@@ -85,6 +85,19 @@ El servidor queda escuchando en **http://localhost:3000**
 
 ## Comandos disponibles
 
+El proyecto incluye un `makefile` (ubicado en `backend/`) que automatiza el levantado de la base de datos y del servidor en un solo paso:
+
+| Comando | Descripción |
+|---|---|
+| `make run` | Levanta la base de datos y el servidor backend juntos (recomendado) |
+| `make start-db` | Levanta únicamente el contenedor de PostgreSQL |
+| `make start-backend` | Levanta únicamente el servidor backend con nodemon |
+| `make stop-db` | Detiene el contenedor de PostgreSQL |
+
+
+También hay una serie de comandos que se pueden utilizar, siempre y cuando estés párado en `Grupo-FJND/backend/` :
+
+
 | Comando | Descripción |
 |---|---|
 | `npm run dev` | Levanta el servidor backend con nodemon |
