@@ -9,4 +9,4 @@ stop-db:
 start-backend:
 	cd ./backend && npm run dev
 
-run backend: start-db start-backend
+run: start-db start-backend
