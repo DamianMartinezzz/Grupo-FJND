@@ -1,0 +1,18 @@
+{
+  "name": "gimnasio",
+  "version": "1.0.0",
+  "description": "Backend de IDS",
+  "main": "app/api.js",
+  "scripts": {
+    "dev": "nodemon app/api.js"
+  },
+  "author": "Fabio Acotto",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
