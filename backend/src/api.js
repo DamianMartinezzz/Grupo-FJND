@@ -5,6 +5,11 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
+const { 
+    getAllSocios
+} = require('./scripts/gimnasio.js');
+
+
 // Health route
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK' });
@@ -12,8 +17,9 @@ app.get('/api/health', (req, res) => {
 
 //  Socios
 // get all socios
-app.get('/api/socios', (req, res) => {
-    res.json({ status: 'OK' });
+app.get('/api/socios', async (req, res) => {
+    const socios = await getAllSocios();
+    res.json(socios);
 });
 
 //get one socio by id
@@ -35,21 +41,6 @@ app.delete('/api/socios/:id', (req, res) => {
 app.put('/api/socios', (req, res) => {
     res.json({ status: 'OK' });
 });      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 app.listen(PORT, () => {
     console.log("Server Listening on PORT:", PORT);
