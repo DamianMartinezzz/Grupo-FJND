@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gimnasio - Test</title>
+</head>
+<body>
+  <h1>Frontend funcionando ✅</h1>
+  <p id="resultado">Cargando socios...</p>
+
+  <script>
+    fetch('http://localhost:3000/api/socios')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('resultado').innerText =
+          'Socios encontrados: ' + data.length;
+      })
+      .catch(err => {
+        document.getElementById('resultado').innerText =
+          'Error al conectar con el backend: ' + err;
+      });
+  </script>
+</body>
+</html>
