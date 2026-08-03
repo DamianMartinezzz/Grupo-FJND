@@ -1,0 +1,38 @@
+services:
+  postgres:
+    container_name: gimnasio
+    image: postgres:17
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backend/.volumes/postgres/data:/var/lib/postgresql/data
+      - ./backend/src/scripts:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: gimnasio
+
+  backend:
+    container_name: gimnasio-backend
+    build: ./backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: gimnasio
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      - postgres
+
+  frontend:
+    container_name: gimnasio-frontend
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
