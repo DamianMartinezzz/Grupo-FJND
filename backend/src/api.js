@@ -11,22 +11,34 @@ const {
     createSocio,
     deleteSocio,
     updateSocio,
+    
+} = require('./scripts/socios.js');
+
+const { 
     getAllProfesores,
     getOneProfesor,
     createProfesor,
     updateProfesor,
     deleteProfesor,
+}    = require('./scripts/profesores.js');   
+
+const { 
     getAllEjercicios,
     getOneEjercicio,
     createEjercicio,
     updateEjercicio,
     deleteEjercicio,
+}   = require('./scripts/ejercicios.js');
+    
+const { 
     getAllClases,
     getOneClase,
     createClase,
     updateClase,
     deleteClase,
-} = require('./scripts/gimnasio.js');
+}   = require('./scripts/clases.js');
+
+
 
 function esTelefonoValido(telefono) {
   return /^\d{10}$/.test(telefono); // exactamente 10 dígitos numéricos
