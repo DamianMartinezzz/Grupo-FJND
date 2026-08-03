@@ -1,12 +1,11 @@
-.PHONY: start-db run stop-db
+.PHONY: start-db stop-db
+
+# Este comando levanta todo lo que está en docker-compose.yml
 
 start-db:
-	docker compose up -d
+	docker compose up --build -d
 
+# Este comando detiene todo
 stop-db:
 	docker compose down
-
-start-backend:
-	cd ./backend && npm run dev
-
-run: start-db start-backend
+	
