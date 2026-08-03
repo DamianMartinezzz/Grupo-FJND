@@ -1,11 +1,13 @@
 // Zona de importaciones
 const express = require('express');
+const cors = require('cors');
 const app = express();
 
 // Importo las funciones de validación
 const { esDniValido, esTelefonoValido, esMailValido } = require('./utils/validaciones');
 
 // Zona de configuración
+app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
