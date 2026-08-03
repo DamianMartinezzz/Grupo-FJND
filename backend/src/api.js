@@ -11,6 +11,21 @@ const {
     createSocio,
     deleteSocio,
     updateSocio,
+    getAllProfesores,
+    getOneProfesor,
+    createProfesor,
+    updateProfesor,
+    deleteProfesor,
+    getAllEjercicios,
+    getOneEjercicio,
+    createEjercicio,
+    updateEjercicio,
+    deleteEjercicio,
+    getAllClases,
+    getOneClase,
+    createClase,
+    updateClase,
+    deleteClase,
 } = require('./scripts/gimnasio.js');
 
 function esTelefonoValido(telefono) {
@@ -31,6 +46,7 @@ app.get('/api/health', (req, res) => {
 }); 
 
 //  Socios
+
 // get all socios
 app.get('/api/socios', async (req, res) => {
     const socios = await getAllSocios();
@@ -128,6 +144,230 @@ app.put('/api/socios/:id', async (req, res) => {
 
   res.json(socio);
 });
+
+// Profesores
+
+// get all profesores
+app.get('/api/profesores', async (req, res) => {
+  const profesores = await getAllProfesores();
+  res.json(profesores);
+});
+
+// get one profesor by id
+app.get('/api/profesores/:id', async (req, res) => {
+  const profesor = await getOneProfesor(req.params.id);
+  if (!profesor) {
+    return res.status(404).json({ error: 'Profesor id: ' + req.params.id + ' not found' });
+  }
+  res.json(profesor);
+});
+
+// insert profesor
+app.post('/api/profesores', async (req, res) => {
+  if (!req.body.nombre || !req.body.apellido || !req.body.dni) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  if (!esDniValido(req.body.dni)) {
+    return res.status(400).json({ error: 'El DNI debe tener 7 u 8 dígitos numéricos' });
+  }
+
+  if (req.body.telefono && !esTelefonoValido(req.body.telefono)) {
+    return res.status(400).json({ error: 'El teléfono debe tener exactamente 10 dígitos numéricos' });
+  }
+
+  if (req.body.mail && !esMailValido(req.body.mail)) {
+    return res.status(400).json({ error: 'El mail no tiene un formato válido' });
+  }
+
+  const profesor = await createProfesor(req.body.nombre, req.body.apellido, req.body.dni, req.body.mail, req.body.telefono);
+
+  if (profesor && profesor.error === 'duplicate_dni') {
+    return res.status(409).json({ error: 'Ya existe un profesor con ese DNI' });
+  }
+  if (!profesor) {
+    return res.status(500).json({ error: 'Failed to create profesor' });
+  }
+  res.status(201).json(profesor);
+});
+
+// update profesor
+app.put('/api/profesores/:id', async (req, res) => {
+  if (!req.body.nombre || !req.body.apellido || !req.body.dni) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  if (!esDniValido(req.body.dni)) {
+    return res.status(400).json({ error: 'El DNI debe tener 7 u 8 dígitos numéricos' });
+  }
+
+  if (req.body.telefono && !esTelefonoValido(req.body.telefono)) {
+    return res.status(400).json({ error: 'El teléfono debe tener exactamente 10 dígitos numéricos' });
+  }
+
+  if (req.body.mail && !esMailValido(req.body.mail)) {
+    return res.status(400).json({ error: 'El mail no tiene un formato válido' });
+  }
+
+  const profesor = await updateProfesor(req.params.id, req.body.nombre, req.body.apellido, req.body.dni, req.body.mail, req.body.telefono);
+
+  if (profesor.error === 'duplicate_dni') {
+    return res.status(409).json({ error: 'Ya existe un profesor con ese DNI' });
+  }
+  if (profesor.error === 'not_found') {
+    return res.status(404).json({ error: 'Profesor id: ' + req.params.id + ' not found' });
+  }
+  res.json(profesor);
+});
+
+// delete profesor
+app.delete('/api/profesores/:id', async (req, res) => {
+  const resultado = await deleteProfesor(req.params.id);
+
+  if (resultado.error === 'not_found') {
+    return res.status(404).json({ error: 'Profesor id: ' + req.params.id + ' not found' });
+  }
+  if (resultado.error === 'foreign_key') {
+    return res.status(409).json({ error: 'No se puede eliminar: el profesor tiene rutinas o clases asociadas' });
+  }
+
+  res.json({ status: 'OK', id: resultado.idprofesor });
+});
+
+// Ejercicios
+
+app.get('/api/ejercicios', async (req, res) => {
+  const ejercicios = await getAllEjercicios();
+  res.json(ejercicios);
+});
+
+app.get('/api/ejercicios/:id', async (req, res) => {
+  const ejercicio = await getOneEjercicio(req.params.id);
+  if (!ejercicio) {
+    return res.status(404).json({ error: 'Ejercicio id: ' + req.params.id + ' not found' });
+  }
+  res.json(ejercicio);
+});
+
+app.post('/api/ejercicios', async (req, res) => {
+  if (!req.body.nombre) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const ejercicio = await createEjercicio(req.body.nombre, req.body.grupo_muscular, req.body.descripcion);
+
+  if (!ejercicio) {
+    return res.status(500).json({ error: 'Failed to create ejercicio' });
+  }
+  res.status(201).json(ejercicio);
+});
+
+app.put('/api/ejercicios/:id', async (req, res) => {
+  if (!req.body.nombre) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const ejercicio = await updateEjercicio(req.params.id, req.body.nombre, req.body.grupo_muscular, req.body.descripcion);
+
+  if (ejercicio.error === 'not_found') {
+    return res.status(404).json({ error: 'Ejercicio id: ' + req.params.id + ' not found' });
+  }
+  res.json(ejercicio);
+});
+
+app.delete('/api/ejercicios/:id', async (req, res) => {
+  const resultado = await deleteEjercicio(req.params.id);
+
+  if (resultado.error === 'not_found') {
+    return res.status(404).json({ error: 'Ejercicio id: ' + req.params.id + ' not found' });
+  }
+  if (resultado.error === 'foreign_key') {
+    return res.status(409).json({ error: 'No se puede eliminar: el ejercicio está usado en rutinas o reportes' });
+  }
+
+  res.json({ status: 'OK', id: resultado.id_ejercicio });
+});
+
+// Clases
+
+app.get('/api/clases', async (req, res) => {
+  const clases = await getAllClases();
+  res.json(clases);
+});
+
+app.get('/api/clases/:id', async (req, res) => {
+  const clase = await getOneClase(req.params.id);
+  if (!clase) {
+    return res.status(404).json({ error: 'Clase id: ' + req.params.id + ' not found' });
+  }
+  res.json(clase);
+});
+
+app.post('/api/clases', async (req, res) => {
+  if (!req.body.id_profesor || !req.body.nombre) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const clase = await createClase(
+    req.body.id_profesor,
+    req.body.nombre,
+    req.body.descripcion,
+    req.body.dia_semana,
+    req.body.hora_inicio,
+    req.body.hora_fin,
+    req.body.cupo_maximo,
+    req.body.estado
+  );
+
+  if (clase && clase.error === 'invalid_profesor') {
+    return res.status(400).json({ error: 'El id_profesor indicado no existe' });
+  }
+  if (!clase) {
+    return res.status(500).json({ error: 'Failed to create clase' });
+  }
+  res.status(201).json(clase);
+});
+
+app.put('/api/clases/:id', async (req, res) => {
+  if (!req.body.id_profesor || !req.body.nombre) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const clase = await updateClase(
+    req.params.id,
+    req.body.id_profesor,
+    req.body.nombre,
+    req.body.descripcion,
+    req.body.dia_semana,
+    req.body.hora_inicio,
+    req.body.hora_fin,
+    req.body.cupo_maximo,
+    req.body.estado
+  );
+
+  if (clase.error === 'invalid_profesor') {
+    return res.status(400).json({ error: 'El id_profesor indicado no existe' });
+  }
+  if (clase.error === 'not_found') {
+    return res.status(404).json({ error: 'Clase id: ' + req.params.id + ' not found' });
+  }
+  res.json(clase);
+});
+
+app.delete('/api/clases/:id', async (req, res) => {
+  const resultado = await deleteClase(req.params.id);
+
+  if (resultado.error === 'not_found') {
+    return res.status(404).json({ error: 'Clase id: ' + req.params.id + ' not found' });
+  }
+  if (resultado.error === 'foreign_key') {
+    return res.status(409).json({ error: 'No se puede eliminar: la clase tiene socios inscriptos' });
+  }
+
+  res.json({ status: 'OK', id: resultado.id_clase });
+});
+
+
 
 app.listen(PORT, () => {
     console.log("Server Listening on PORT:", PORT);
