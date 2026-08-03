@@ -1,6 +1,8 @@
+const { dbClient } = require('./gimnasio');
+
 async function getAllEjercicios() {
-  const result = await dbClient.query('SELECT * FROM ejercicios');
-  return result.rows;
+    const result = await dbClient.query('SELECT * FROM ejercicios');
+    return result.rows;
 }
 
 async function getOneEjercicio(id) {
@@ -9,11 +11,16 @@ async function getOneEjercicio(id) {
 }
 
 async function createEjercicio(nombre, grupoMuscular, descripcion) {
-  const result = await dbClient.query(
-    'INSERT INTO ejercicios (nombre, grupo_muscular, descripcion) VALUES ($1, $2, $3) RETURNING *',
-    [nombre, grupoMuscular, descripcion]
-  );
-  return result.rows[0];
+    try {
+        // Usamos los nombres de columnas definidos en tu CREATE TABLE
+        const result = await dbClient.query(
+            'INSERT INTO Ejercicios (Nombre, Grupo_Muscular, Descripcion) VALUES ($1, $2, $3) RETURNING *',
+            [nombre, grupoMuscular, descripcion]
+        );
+        return result.rows[0];
+    } catch (err) {
+        throw err;
+    }
 }
 
 async function updateEjercicio(id, nombre, grupoMuscular, descripcion) {

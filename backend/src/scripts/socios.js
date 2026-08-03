@@ -1,3 +1,6 @@
+
+const { dbClient } = require('./gimnasio');// Importo la conexion
+
 async function getAllSocios() {
     const result = await dbClient.query('SELECT * FROM socios');
     return result.rows;

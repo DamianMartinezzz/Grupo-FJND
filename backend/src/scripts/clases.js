@@ -1,10 +1,8 @@
+const { dbClient } = require('./gimnasio');
+
 async function getAllClases() {
-    const result = await dbClient.query(`
-    SELECT c.*, p.nombre AS nombre_profesor, p.apellido AS apellido_profesor
-    FROM clases c
-    JOIN profesores p ON c.id_profesor = p.idprofesor
-  `);
-  return result.rows;
+    const result = await dbClient.query('SELECT * FROM clases');
+    return result.rows;
 }
 
 async function getOneClase(id) {

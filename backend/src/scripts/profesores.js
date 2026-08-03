@@ -1,3 +1,5 @@
+const { dbClient } = require('./gimnasio'); // Importo la conexion
+
 async function getAllProfesores() {
   const result = await dbClient.query('SELECT * FROM profesores');
   return result.rows;
