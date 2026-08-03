@@ -1,10 +1,10 @@
-.PHONY: start-db run-backend stop-db
+.PHONY: start-db run stop-db
 
 start-db:
-	cd ./backend && docker compose up -d
+	docker compose up -d
 
 stop-db:
-	cd ./backend && docker compose down
+	docker compose down
 
 start-backend:
 	cd ./backend && npm run dev
