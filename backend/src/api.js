@@ -46,6 +46,46 @@ const {
     deleteClase,
 } = require('./scripts/clases.js');
 
+const {
+    getAllRutinas,
+    getOneRutina,
+    createRutina,
+    updateRutina,
+    deleteRutina,
+} = require('./scripts/rutinas.js');
+ 
+const {
+    getAllDetalleRutina,
+    getDetallesByRutina,
+    createDetalleRutina,
+    updateDetalleRutina,
+    deleteDetalleRutina,
+} = require('./scripts/detalleRutina.js');
+ 
+const {
+    getAllReportes,
+    getOneReporte,
+    createReporte,
+    updateReporte,
+    deleteReporte,
+} = require('./scripts/reporte.js');
+ 
+const {
+    getAllDetalleReporte,
+    getDetallesByReporte,
+    createDetalleReporte,
+    updateDetalleReporte,
+    deleteDetalleReporte,
+} = require('./scripts/detalleReporte.js');
+ 
+const {
+    getAllSocioClase,
+    getOneSocioClase,
+    createSocioClase,
+    updateSocioClase,
+    deleteSocioClase,
+} = require('./scripts/socioClase.js');
+
 // Health route
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK' });
@@ -373,4 +413,376 @@ app.delete('/api/clases/:id', async (req, res) => {
 app.listen(PORT, () => {
     console.log("Server Listening on PORT:", PORT);
     });
+
+// Rutinas
+
+app.get('/api/rutinas', async (req, res) => {
+  const rutinas = await getAllRutinas();
+  res.json(rutinas);
+});
+ 
+app.get('/api/rutinas/:id', async (req, res) => {
+  const rutina = await getOneRutina(req.params.id);
+  if (!rutina) {
+    return res.status(404).json({ error: 'Rutina id: ' + req.params.id + ' not found' });
+  }
+  res.json(rutina);
+});
+ 
+// detalle de una rutina puntual (dias, ejercicios, series, etc.)
+app.get('/api/rutinas/:id/detalles', async (req, res) => {
+  const detalles = await getDetallesByRutina(req.params.id);
+  res.json(detalles);
+});
+ 
+app.post('/api/rutinas', async (req, res) => {
+  if (!req.body.id_socio || !req.body.id_profesor || !req.body.nombre) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const rutina = await createRutina(
+    req.body.id_socio,
+    req.body.id_profesor,
+    req.body.nombre,
+    req.body.fecha_inicio,
+    req.body.fecha_fin,
+    req.body.fecha_modificacion,
+    req.body.estado
+  );
+ 
+  if (rutina && rutina.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_socio o id_profesor indicado no existe' });
+  }
+  if (!rutina) {
+    return res.status(500).json({ error: 'Failed to create rutina' });
+  }
+  res.status(201).json(rutina);
+});
+ 
+app.put('/api/rutinas/:id', async (req, res) => {
+  if (!req.body.id_socio || !req.body.id_profesor || !req.body.nombre) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const rutina = await updateRutina(
+    req.params.id,
+    req.body.id_socio,
+    req.body.id_profesor,
+    req.body.nombre,
+    req.body.fecha_inicio,
+    req.body.fecha_fin,
+    req.body.fecha_modificacion,
+    req.body.estado
+  );
+ 
+  if (rutina && rutina.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_socio o id_profesor indicado no existe' });
+  }
+  if (!rutina) {
+    return res.status(404).json({ error: 'Rutina id: ' + req.params.id + ' not found' });
+  }
+  res.json(rutina);
+});
+ 
+app.delete('/api/rutinas/:id', async (req, res) => {
+  const resultado = await deleteRutina(req.params.id);
+ 
+  if (resultado.error === 'not_found') {
+    return res.status(404).json({ error: 'Rutina id: ' + req.params.id + ' not found' });
+  }
+  if (resultado.error === 'foreign_key') {
+    return res.status(409).json({ error: 'No se puede eliminar: la rutina tiene detalles o reportes asociados' });
+  }
+ 
+  res.json({ status: 'OK', id: resultado.id_rutina });
+});
+
+// Detalle Rutina
+// (CRUD directo por id_detalle, ademas del GET anidado de arriba)
+
+app.get('/api/detalle-rutina', async (req, res) => {
+  const detalles = await getAllDetalleRutina();
+  res.json(detalles);
+});
+ 
+app.post('/api/detalle-rutina', async (req, res) => {
+  if (!req.body.id_rutina || !req.body.id_ejercicio || req.body.dia == null || req.body.orden == null || !req.body.series || !req.body.repeticiones_desde || !req.body.repeticiones_hasta) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const detalle = await createDetalleRutina(
+    req.body.id_rutina,
+    req.body.id_ejercicio,
+    req.body.dia,
+    req.body.orden,
+    req.body.series,
+    req.body.repeticiones_desde,
+    req.body.repeticiones_hasta,
+    req.body.descanso
+  );
+ 
+  if (detalle && detalle.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_rutina o id_ejercicio indicado no existe' });
+  }
+  if (!detalle) {
+    return res.status(500).json({ error: 'Failed to create detalle de rutina' });
+  }
+  res.status(201).json(detalle);
+});
+ 
+app.put('/api/detalle-rutina/:id', async (req, res) => {
+  if (!req.body.id_rutina || !req.body.id_ejercicio || req.body.dia == null || req.body.orden == null || !req.body.series || !req.body.repeticiones_desde || !req.body.repeticiones_hasta) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const detalle = await updateDetalleRutina(
+    req.params.id,
+    req.body.id_rutina,
+    req.body.id_ejercicio,
+    req.body.dia,
+    req.body.orden,
+    req.body.series,
+    req.body.repeticiones_desde,
+    req.body.repeticiones_hasta,
+    req.body.descanso
+  );
+ 
+  if (detalle && detalle.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_rutina o id_ejercicio indicado no existe' });
+  }
+  if (!detalle) {
+    return res.status(404).json({ error: 'Detalle id: ' + req.params.id + ' not found' });
+  }
+  res.json(detalle);
+});
+ 
+app.delete('/api/detalle-rutina/:id', async (req, res) => {
+  const resultado = await deleteDetalleRutina(req.params.id);
+ 
+  if (resultado.error === 'not_found') {
+    return res.status(404).json({ error: 'Detalle id: ' + req.params.id + ' not found' });
+  }
+  if (resultado.error === 'foreign_key') {
+    return res.status(409).json({ error: 'No se puede eliminar este detalle' });
+  }
+ 
+  res.json({ status: 'OK', id: resultado.id_detalle });
+});
+
+// Reportes
+
+app.get('/api/reportes', async (req, res) => {
+  const reportes = await getAllReportes();
+  res.json(reportes);
+});
+ 
+app.get('/api/reportes/:id', async (req, res) => {
+  const reporte = await getOneReporte(req.params.id);
+  if (!reporte) {
+    return res.status(404).json({ error: 'Reporte id: ' + req.params.id + ' not found' });
+  }
+  res.json(reporte);
+});
+ 
+// detalle de un reporte puntual (ejercicios realizados, series, peso, etc.)
+app.get('/api/reportes/:id/detalles', async (req, res) => {
+  const detalles = await getDetallesByReporte(req.params.id);
+  res.json(detalles);
+});
+ 
+app.post('/api/reportes', async (req, res) => {
+  if (!req.body.id_rutina || !req.body.id_socio || req.body.dia == null || !req.body.fecha_asistencia) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const reporte = await createReporte(
+    req.body.id_rutina,
+    req.body.id_socio,
+    req.body.dia,
+    req.body.fecha_asistencia
+  );
+ 
+  if (reporte && reporte.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_rutina o id_socio indicado no existe' });
+  }
+  if (!reporte) {
+    return res.status(500).json({ error: 'Failed to create reporte' });
+  }
+  res.status(201).json(reporte);
+});
+ 
+app.put('/api/reportes/:id', async (req, res) => {
+  if (!req.body.id_rutina || !req.body.id_socio || req.body.dia == null || !req.body.fecha_asistencia) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const reporte = await updateReporte(
+    req.params.id,
+    req.body.id_rutina,
+    req.body.id_socio,
+    req.body.dia,
+    req.body.fecha_asistencia
+  );
+ 
+  if (reporte && reporte.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_rutina o id_socio indicado no existe' });
+  }
+  if (!reporte) {
+    return res.status(404).json({ error: 'Reporte id: ' + req.params.id + ' not found' });
+  }
+  res.json(reporte);
+});
+ 
+app.delete('/api/reportes/:id', async (req, res) => {
+  const resultado = await deleteReporte(req.params.id);
+ 
+  if (resultado.error === 'not_found') {
+    return res.status(404).json({ error: 'Reporte id: ' + req.params.id + ' not found' });
+  }
+  if (resultado.error === 'foreign_key') {
+    return res.status(409).json({ error: 'No se puede eliminar: el reporte tiene detalles asociados' });
+  }
+ 
+  res.json({ status: 'OK', id: resultado.id_reporte });
+});
+
+// Detalle de reporte
+
+app.get('/api/detalle-reporte', async (req, res) => {
+  const detalles = await getAllDetalleReporte();
+  res.json(detalles);
+});
+ 
+app.post('/api/detalle-reporte', async (req, res) => {
+  if (!req.body.id_reporte || !req.body.id_ejercicio) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const detalle = await createDetalleReporte(
+    req.body.id_reporte,
+    req.body.id_ejercicio,
+    req.body.series_realizadas,
+    req.body.repeticiones_realizadas,
+    req.body.peso_utilizado,
+    req.body.observaciones
+  );
+ 
+  if (detalle && detalle.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_reporte o id_ejercicio indicado no existe' });
+  }
+  if (!detalle) {
+    return res.status(500).json({ error: 'Failed to create detalle de reporte' });
+  }
+  res.status(201).json(detalle);
+});
+ 
+app.put('/api/detalle-reporte/:id', async (req, res) => {
+  if (!req.body.id_reporte || !req.body.id_ejercicio) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const detalle = await updateDetalleReporte(
+    req.params.id,
+    req.body.id_reporte,
+    req.body.id_ejercicio,
+    req.body.series_realizadas,
+    req.body.repeticiones_realizadas,
+    req.body.peso_utilizado,
+    req.body.observaciones
+  );
+ 
+  if (detalle && detalle.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_reporte o id_ejercicio indicado no existe' });
+  }
+  if (!detalle) {
+    return res.status(404).json({ error: 'Detalle id: ' + req.params.id + ' not found' });
+  }
+  res.json(detalle);
+});
+ 
+app.delete('/api/detalle-reporte/:id', async (req, res) => {
+  const resultado = await deleteDetalleReporte(req.params.id);
+ 
+  if (resultado.error === 'not_found') {
+    return res.status(404).json({ error: 'Detalle id: ' + req.params.id + ' not found' });
+  }
+  if (resultado.error === 'foreign_key') {
+    return res.status(409).json({ error: 'No se puede eliminar este detalle' });
+  }
+ 
+  res.json({ status: 'OK', id: resultado.id_detalle });
+});
+
+// Socio-Clase (Inscripción de socios a clases)
+
+app.get('/api/socio-clase', async (req, res) => {
+  const inscripciones = await getAllSocioClase();
+  res.json(inscripciones);
+});
+ 
+app.get('/api/socio-clase/:id', async (req, res) => {
+  const inscripcion = await getOneSocioClase(req.params.id);
+  if (!inscripcion) {
+    return res.status(404).json({ error: 'Inscripcion id: ' + req.params.id + ' not found' });
+  }
+  res.json(inscripcion);
+});
+ 
+app.post('/api/socio-clase', async (req, res) => {
+  if (!req.body.id_socio || !req.body.id_clase) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const inscripcion = await createSocioClase(
+    req.body.id_socio,
+    req.body.id_clase,
+    req.body.fecha_inscripcion,
+    req.body.fecha_baja,
+    req.body.estado
+  );
+ 
+  if (inscripcion && inscripcion.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_socio o id_clase indicado no existe' });
+  }
+  if (!inscripcion) {
+    return res.status(500).json({ error: 'Failed to create inscripcion' });
+  }
+  res.status(201).json(inscripcion);
+});
+ 
+app.put('/api/socio-clase/:id', async (req, res) => {
+  if (!req.body.id_socio || !req.body.id_clase) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+ 
+  const inscripcion = await updateSocioClase(
+    req.params.id,
+    req.body.id_socio,
+    req.body.id_clase,
+    req.body.fecha_inscripcion,
+    req.body.fecha_baja,
+    req.body.estado
+  );
+ 
+  if (inscripcion && inscripcion.error === 'foreign_key') {
+    return res.status(400).json({ error: 'El id_socio o id_clase indicado no existe' });
+  }
+  if (!inscripcion) {
+    return res.status(404).json({ error: 'Inscripcion id: ' + req.params.id + ' not found' });
+  }
+  res.json(inscripcion);
+});
+ 
+app.delete('/api/socio-clase/:id', async (req, res) => {
+  const resultado = await deleteSocioClase(req.params.id);
+ 
+  if (resultado.error === 'not_found') {
+    return res.status(404).json({ error: 'Inscripcion id: ' + req.params.id + ' not found' });
+  }
+  if (resultado.error === 'foreign_key') {
+    return res.status(409).json({ error: 'No se puede eliminar esta inscripcion' });
+  }
+ 
+  res.json({ status: 'OK', id: resultado.id_usuario_clase });
+});
 
