@@ -89,9 +89,7 @@ El proyecto incluye un `makefile` (ubicado en `backend/`) que automatiza el leva
 
 | Comando | Descripción |
 |---|---|
-| `make run` | Levanta la base de datos y el servidor backend juntos (recomendado) |
 | `make start-db` | Levanta únicamente el contenedor de PostgreSQL |
-| `make start-backend` | Levanta únicamente el servidor backend con nodemon |
 | `make stop-db` | Detiene el contenedor de PostgreSQL |
 
 
@@ -100,7 +98,6 @@ También hay una serie de comandos que se pueden utilizar, siempre y cuando est�
 
 | Comando | Descripción |
 |---|---|
-| `npm run dev` | Levanta el servidor backend con nodemon |
 | `docker compose up` | Levanta los contenedores (base de datos, etc.) |
 | `docker compose down` | Detiene y elimina los contenedores |
 | `npm install` | Instala las dependencias del backend |
