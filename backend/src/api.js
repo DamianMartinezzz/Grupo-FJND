@@ -1,9 +1,16 @@
+// Zona de importaciones
 const express = require('express');
-
 const app = express();
+
+// Importo las funciones de validación
+const { esDniValido, esTelefonoValido, esMailValido } = require('./utils/validaciones');
+
+// Zona de configuración
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
+
+// Zona de Rutas
 
 const { 
     getAllSocios,
@@ -11,7 +18,6 @@ const {
     createSocio,
     deleteSocio,
     updateSocio,
-    
 } = require('./scripts/socios.js');
 
 const { 
@@ -20,7 +26,7 @@ const {
     createProfesor,
     updateProfesor,
     deleteProfesor,
-}    = require('./scripts/profesores.js');   
+} = require('./scripts/profesores.js');   
 
 const { 
     getAllEjercicios,
@@ -28,7 +34,7 @@ const {
     createEjercicio,
     updateEjercicio,
     deleteEjercicio,
-}   = require('./scripts/ejercicios.js');
+} = require('./scripts/ejercicios.js');
     
 const { 
     getAllClases,
@@ -36,21 +42,7 @@ const {
     createClase,
     updateClase,
     deleteClase,
-}   = require('./scripts/clases.js');
-
-
-
-function esTelefonoValido(telefono) {
-  return /^\d{10}$/.test(telefono); // exactamente 10 dígitos numéricos
-}
-
-function esMailValido(mail) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail);
-}
-
-function esDniValido(dni) {
-  return /^\d{7,8}$/.test(dni); // solo números (7 u 8 dígitos)
-}
+} = require('./scripts/clases.js');
 
 // Health route
 app.get('/api/health', (req, res) => {
@@ -61,8 +53,12 @@ app.get('/api/health', (req, res) => {
 
 // get all socios
 app.get('/api/socios', async (req, res) => {
-    const socios = await getAllSocios();
-    res.json(socios);
+    try {
+        const socios = await getAllSocios(); 
+        res.json(socios); 
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
 });
 
 //get one socio by id
@@ -176,31 +172,22 @@ app.get('/api/profesores/:id', async (req, res) => {
 
 // insert profesor
 app.post('/api/profesores', async (req, res) => {
-  if (!req.body.nombre || !req.body.apellido || !req.body.dni) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
-  if (!esDniValido(req.body.dni)) {
-    return res.status(400).json({ error: 'El DNI debe tener 7 u 8 dígitos numéricos' });
-  }
-
-  if (req.body.telefono && !esTelefonoValido(req.body.telefono)) {
-    return res.status(400).json({ error: 'El teléfono debe tener exactamente 10 dígitos numéricos' });
-  }
-
-  if (req.body.mail && !esMailValido(req.body.mail)) {
-    return res.status(400).json({ error: 'El mail no tiene un formato válido' });
-  }
-
-  const profesor = await createProfesor(req.body.nombre, req.body.apellido, req.body.dni, req.body.mail, req.body.telefono);
-
-  if (profesor && profesor.error === 'duplicate_dni') {
-    return res.status(409).json({ error: 'Ya existe un profesor con ese DNI' });
-  }
-  if (!profesor) {
-    return res.status(500).json({ error: 'Failed to create profesor' });
-  }
-  res.status(201).json(profesor);
+    
+    if (!req.body.nombre || !req.body.apellido || !req.body.dni) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    if (!esDniValido(req.body.dni)) {
+        return res.status(400).json({ error: 'El DNI debe tener 7 u 8 dígitos' });
+    }
+    try {
+        const profesor = await createProfesor(req.body.nombre, req.body.apellido, req.body.dni, req.body.mail, req.body.telefono);        
+        if (profesor.error === 'duplicate_dni') {
+            return res.status(409).json({ error: 'Ya existe un profesor con ese DNI' });
+        }
+        res.status(201).json(profesor);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to create profesor' });
+    }
 });
 
 // update profesor
