@@ -68,7 +68,7 @@ const {
     createReporte,
     updateReporte,
     deleteReporte,
-} = require('./scripts/reporte.js');
+} = require('./scripts/reportes.js');
  
 const {
     getAllDetalleReporte,
