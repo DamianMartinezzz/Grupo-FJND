@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
     <head>
+        <meta charset="UTF-8">
         <title>Gimnasio</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     </head>
@@ -15,13 +16,19 @@
                     <div class="navbar-start">
                         <a class="navbar-item" href="index.html">Home</a>
                         <a class="navbar-item" href="socios.html">Socios</a>
-                        <a class="navbar-item" href="clases.html">Clases</a>
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Clases</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="clases.html">Ver Clases</a>
+                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                            </div>
+                        </div>
 
                         <div class="navbar-item has-dropdown is-hoverable">
                             <a class="navbar-link">Rutinas</a>
                             <div class="navbar-dropdown">
-                                <a class="navbar-item" href="arma_rutina.html">Arma tu rutina</a>
-                                <a class="navbar-item" href="detalleRutina.html">Ver detalle de rutinas</a>
+                                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
+                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
                             </div>
                         </div>
 
@@ -31,7 +38,7 @@
                         <div class="navbar-item has-dropdown is-hoverable">
                             <a class="navbar-link">Reportes</a>
                             <div class="navbar-dropdown">
-                                <a class="navbar-item" href="detalleReporte.html">Ver detalle de reportes</a>
+                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
                             </div>
                         </div>
                     </div>
