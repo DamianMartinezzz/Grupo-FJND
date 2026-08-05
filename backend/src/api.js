@@ -4,7 +4,7 @@ const cors = require('cors');
 const app = express();
 
 // Importo las funciones de validación
-const { esDniValido, esTelefonoValido, esMailValido } = require('./utils/validaciones');
+const { esDniValido, esTelefonoValido, esMailValido, esFechaNacimientoValida } = require('./utils/validaciones');
 
 // Zona de configuración
 app.use(cors());
@@ -137,7 +137,11 @@ app.post('/api/socios', async (req, res) => {
     return res.status(400).json({ error: 'El dni no tiene un formato válido' });
     }
 
-    const socio = await createSocio(req.body.nombre, req.body.apellido, req.body.dni, req.body.mail, req.body.telefono);
+    if (!esFechaNacimientoValida(req.body.fecha_nacimiento)) {
+    return res.status(400).json({ error: 'La fecha de nacimiento no es válida' });
+    }
+
+    const socio = await createSocio(req.body.nombre, req.body.apellido, req.body.dni, req.body.mail, req.body.telefono, req.body.fecha_nacimiento);
     
     if (socio && socio.error === 'duplicate_dni') {
     return res.status(409).json({ error: 'Ya existe un socio con ese DNI' });
@@ -174,19 +178,19 @@ app.put('/api/socios/:id', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-    if (!esTelefonoValido(req.body.telefono)) {
+  if (!esTelefonoValido(req.body.telefono)) {
     return res.status(400).json({ error: 'El teléfono debe tener exactamente 10 dígitos numéricos' });
   }
 
-    if (!esMailValido(req.body.mail)) {
+  if (!esMailValido(req.body.mail)) {
     return res.status(400).json({ error: 'El mail no tiene un formato válido' });
   }
 
-    if (!esMailValido(req.body.mail)) {
-    return res.status(400).json({ error: 'El mail no tiene un formato válido' });
+  if (!esDniValido(req.body.dni)) {
+    return res.status(400).json({ error: 'El dni no tiene un formato válido' });
   }
 
-  const socio = await updateSocio(req.params.id, req.body.nombre, req.body.apellido, req.body.dni, req.body.mail, req.body.telefono);
+  const socio = await updateSocio(req.params.id, req.body.nombre, req.body.apellido, req.body.dni, req.body.mail, req.body.telefono, req.body.fecha_nacimiento);
 
   if (!socio) {
     return res.status(404).json({ error: 'Socio id: ' + req.params.id + ' not found' });
@@ -407,12 +411,6 @@ app.delete('/api/clases/:id', async (req, res) => {
 
   res.json({ status: 'OK', id: resultado.id_clase });
 });
-
-
-
-app.listen(PORT, () => {
-    console.log("Server Listening on PORT:", PORT);
-    });
 
 // Rutinas
 
@@ -786,3 +784,6 @@ app.delete('/api/socio-clase/:id', async (req, res) => {
   res.json({ status: 'OK', id: resultado.id_usuario_clase });
 });
 
+app.listen(PORT, () => {
+    console.log("Server Listening on PORT:", PORT);
+    });

@@ -4,50 +4,123 @@
         <title>Gimnasio</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     </head>
-                <body>
-                    <div class="container is-fluid">
-                        <nav class="navbar" role="navigation" aria-label="main navigation">
-                            <div class="navbar-brand">
-                                <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
-                    </div>
+    <body>
+        <div class="container is-fluid">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+                </div>
 
-                    <div id="navbarBasicExample" class="navbar-menu">
-                        <div class="navbar-start">
-                            <a class="navbar-item" href="index.html">Home</a>
-                            <a class="navbar-item" href="socios.html">Socios</a>
-                            <a class="navbar-item" href="clases.html">Clases</a>
-                            <!-- Menú desplegable para Rutinas -->
-            <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link"rutinas.html">
-                Rutinas
-              </a>
-              <div class="navbar-dropdown">
-                <a class="navbar-item" href="arma_rutina.html">Arma tu rutina</a>
-                <a class="navbar-item" href="detalleRutina.html">Ver detalle de rutinas</a>
-              </div>
-            </div>
+                <div id="navbarBasicExample" class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="index.html">Home</a>
+                        <a class="navbar-item" href="socios.html">Socios</a>
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Clases</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="clases.html">Ver Clases</a>
+                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                            </div>
+                        </div>
 
-            <!-- Estos dos quedan como enlaces simples -->
-            <a class="navbar-item" href="profesores.html">Profesores</a>
-            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Rutinas</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
+                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                            </div>
+                        </div>
 
-            <!-- Menú desplegable para Reportes -->
-            <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link"reportes.html">
-                Reportes
-              </a>
-              <div class="navbar-dropdown">
-                <a class="navbar-item" href="detalleReporte.html">Ver detalle de reportes</a>
-                                    </div>
-                                </div>
+                        <a class="navbar-item" href="profesores.html">Profesores</a>
+                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Reportes</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
                             </div>
                         </div>
                     </div>
-                </nav>
-                    <div class="content">
-                        <h1>Profesores!</h1>
-                    </div>                        
                 </div>
+            </nav>
+       
+            <div class="container mt-5">
+                <h1 class="title is-1">Profesores</h1>
+                <p class="subtitle mt-3">Acá vas a poder gestionar todo lo relacionado a los profesores del gimnasio: alta, modificación y baja.</p>
+
+                <div class="columns is-centered mt-5">
+                    <div class="column is-narrow">
+                        <div class="card">
+                            <div class="card-content has-text-centered">
+                                <p class="title is-4">Crear Profesor</p>
+                                <p class="subtitle is-6">Registrá un nuevo profesor en el sistema</p>
+                                <a href="crear-profesor.html" class="button is-primary">Crear</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-6">
+
+                <h2 class="title is-4 mb-4">Listado de Profesores</h2>
+
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>DNI</th>
+                            <th>Teléfono</th>
+                            <th>Mail</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-profesores">
+                        <tr>
+                            <td colspan="7" class="has-text-centered">Cargando profesores...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <script>
+                    const API_PROFESORES = "http://localhost:3000/api/profesores";
+
+                    async function cargarProfesores() {
+                        const tbody = document.getElementById("tabla-profesores");
+
+                        try {
+                            const response = await fetch(API_PROFESORES);
+                            const profesores = await response.json();
+
+                            if (!profesores.length) {
+                                tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered">No hay profesores registrados</td></tr>`;
+                                return;
+                            }
+
+                            tbody.innerHTML = profesores.map(profesor => `
+                                <tr>
+                                    <td>${profesor.id_profesor ?? profesor.id}</td>
+                                    <td>${profesor.nombre}</td>
+                                    <td>${profesor.apellido}</td>
+                                    <td>${profesor.dni}</td>
+                                    <td>${profesor.telefono ?? "-"}</td>
+                                    <td>${profesor.mail ?? profesor.email ?? "-"}</td>
+                                    <td>
+                                        <a href="modificar-profesor.html?id=${profesor.id_profesor ?? profesor.id}" class="button is-small is-warning">Editar</a>
+                                        <a href="eliminar-profesor.html?id=${profesor.id_profesor ?? profesor.id}" class="button is-small is-danger">Eliminar</a>
+                                    </td>
+                                </tr>
+                            `).join("");
+
+                        } catch (error) {
+                            tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered has-text-danger">Error al cargar los profesores: ${error.message}</td></tr>`;
+                        }
+                    }
+
+                    cargarProfesores();
+                </script>
             </div>
-        </body>
-    </html>
+        </div>
+    </body>
+</html>

@@ -15,4 +15,6 @@ start-front:
 # Este comando detiene el frontend
 stop-front:
 	@fuser -k 8080/tcp || echo "No había nada corriendo en el puerto 8080"
-	
+
+kill-front:
+	@fuser -k 8080/tcp || echo "Puerto 8080 bajado"

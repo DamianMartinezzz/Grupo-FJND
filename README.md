@@ -6,6 +6,8 @@ Este proyecto consiste en el desarrollo de un sitio web para el control y admini
 
 El objetivo es aplicar de forma práctica los conocimientos adquiridos durante la cursada de Introducción al Desarrollo de Software, construyendo una aplicación full-stack completa: desde el modelado de la base de datos hasta la exposición de una API REST y su consumo desde un frontend.
 
+Esta aplicación asume un único usuario administrador operando el sistema, como por ejemplo, el administrador del gimnasio. No implementa autenticación ni control de roles, por lo que cualquier persona con acceso a la aplicación puede ver y modificar los datos de todas las entidades.
+
 ### Tecnologías utilizadas
 
 -Backend: Node.js + Express
@@ -26,62 +28,45 @@ Antes de levantar el proyecto, es necesario tener instalado:
 
 ## Cómo levantar el proyecto
 
+# Guía de Instalación y Ejecución
+
+Seguí estos pasos para clonar y levantar todo el entorno de la aplicación (Base de datos, Backend y Frontend) mediante contenedores.
+
+### Prerrequisitos
+Asegurate de tener instalado en tu sistema:
+* [Docker](https://www.docker.com/) y Docker Compose
+* [Git](https://git-scm.com/)
+* `make` (Opcional, para usar los comandos automatizados)
+
 ### 1. Clonar el repositorio
+Abrí tu terminal y cloná el repositorio en tu computadora:
 
 ```bash
-git clone URL_DEL_REPOSITORIO
+git clone https://github.com/DamianMartinezzz/Grupo-FJND.git
 cd GRUPO-FJND
 ```
 
-### 2. Levantar los servicios con Docker Compose
-
-Desde la raíz del proyecto:
-
-```bash
-docker compose up
-```
-
-Esto va a levantar el contenedor de **PostgreSQL**, creando la base de datos y ejecutando los scripts `esquema.sql` y `datosinic.sql` para dejarla lista con su estructura y datos de prueba.
-
-Para levantarlo en segundo plano:
+### 2. Levantar la base de datos y el backend
+Ejecutá el siguiente comando para poner en marcha los servicios principales (PostgreSQL y el servidor backend):
 
 ```bash
-docker compose up -d
+make start-db
 ```
 
-Para detener los servicios:
+### 3. Levantar el frontend
+En una nueva pestaña o ventana de la terminal, utilizá el comando correspondiente para iniciar el contenedor del frontend:
 
 ```bash
-docker compose down
+make start-front
 ```
 
-### 3. Instalar las dependencias del backend
+### 4. Acceder a la aplicación
+Una vez que todos los contenedores estén corriendo de forma exitosa, ya podés utilizar el sistema:
 
-Parado en la carpeta `backend/`:
+-Frontend: Ingresá desde tu navegador a http://localhost:8080
 
-```bash
-cd backend
-npm install
-```
+-Backend: Quedará escuchando y procesando las peticiones de la API en el puerto 3000.
 
-Este comando lee el `package.json` y descarga en `node_modules/` todas las dependencias necesarias (`express`, `pg`, `nodemon`, entre otras).
-
-### 4. Correr el servidor backend
-
-En modo desarrollo (con recarga automática ante cambios, usando `nodemon`):
-
-```bash
-npm run dev
-```
-
-Si todo funciona correctamente, la terminal debería mostrar algo similar a:
-
-```
-[nodemon] starting `node app/api.js`
-Server Listening on PORT: 3000
-```
-
-El servidor queda escuchando en **http://localhost:3000**
 
 ## Comandos disponibles
 
@@ -91,10 +76,10 @@ El proyecto incluye un `makefile` (ubicado en `backend/`) que automatiza el leva
 |---|---|
 | `make start-db` | Levanta únicamente el contenedor de PostgreSQL |
 | `make stop-db` | Detiene el contenedor de PostgreSQL |
-
+| `make start-front` | Levanta únicamente el frontend |
+| `make stop-front` | Detiene el contenedor del frontend |
 
 También hay una serie de comandos que se pueden utilizar, siempre y cuando estés párado en `Grupo-FJND/backend/` :
-
 
 | Comando | Descripción |
 |---|---|

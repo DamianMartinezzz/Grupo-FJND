@@ -4,50 +4,130 @@
         <title>Gimnasio</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     </head>
-                <body>
-                    <div class="container is-fluid">
-                        <nav class="navbar" role="navigation" aria-label="main navigation">
-                            <div class="navbar-brand">
-                                <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
-                    </div>
+    <body>
+        <div class="container is-fluid">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+                </div>
 
-                    <div id="navbarBasicExample" class="navbar-menu">
-                        <div class="navbar-start">
-                            <a class="navbar-item" href="index.html">Home</a>
-                            <a class="navbar-item" href="socios.html">Socios</a>
-                            <a class="navbar-item" href="clases.html">Clases</a>
-                            <!-- Menú desplegable para Rutinas -->
-            <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link"rutinas.html">
-                Rutinas
-              </a>
-              <div class="navbar-dropdown">
-                <a class="navbar-item" href="arma_rutina.html">Arma tu rutina</a>
-                <a class="navbar-item" href="detalleRutina.html">Ver detalle de rutinas</a>
-              </div>
-            </div>
+                <div id="navbarBasicExample" class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="index.html">Home</a>
+                        <a class="navbar-item" href="socios.html">Socios</a>
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Clases</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="clases.html">Ver Clases</a>
+                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                            </div>
+                        </div>
 
-            <!-- Estos dos quedan como enlaces simples -->
-            <a class="navbar-item" href="profesores.html">Profesores</a>
-            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Rutinas</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
+                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                            </div>
+                        </div>
 
-            <!-- Menú desplegable para Reportes -->
-            <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link"reportes.html">
-                Reportes
-              </a>
-              <div class="navbar-dropdown">
-                <a class="navbar-item" href="detalleReporte.html">Ver detalle de reportes</a>
-                                    </div>
-                                </div>
+                        <a class="navbar-item" href="profesores.html">Profesores</a>
+                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Reportes</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
                             </div>
                         </div>
                     </div>
-                </nav>
-                    <div class="content">
-                        <h1>Clases!</h1>
-                    </div>                        
                 </div>
+            </nav>
+
+            <div class="content">
+                <h1 class="title is-1">Clases</h1>
+                <p class="subtitle mt-4">El administrador puede gestionar las clases del gimnasio: alta, modificación (hora, cupo, profesor, etc) y baja.</p>
+
+                <div class="columns is-centered">
+                    <div class="column is-narrow">
+                        <div class="card">
+                            <div class="card-content has-text-centered">
+                                <p class="title is-4">Crear Clase</p>
+                                <p class="subtitle is-6">Agregá una nueva clase al sistema</p>
+                                <a href="crear-clase.html" class="button is-primary">Crear</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h2 class="title is-3">Listado de Clases</h2>
+
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Profesor</th>
+                            <th>Día</th>
+                            <th>Horario</th>
+                            <th>Cupo Máximo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-clases">
+                        <tr>
+                            <td colspan="8" class="has-text-centered">Cargando clases...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <script>
+                    const API_CLASES = "http://localhost:3000/api/clases";
+
+                    function formatearHora(hora) {
+                        if (!hora) return "-";
+                        return hora.substring(0, 5);
+                    }
+
+                    async function cargarClases() {
+                        const tbody = document.getElementById("tabla-clases");
+
+                        try {
+                            const response = await fetch(API_CLASES);
+                            const clases = await response.json();
+
+                            if (!clases.length) {
+                                tbody.innerHTML = `<tr><td colspan="8" class="has-text-centered">No hay clases registradas</td></tr>`;
+                                return;
+                            }
+
+                            tbody.innerHTML = clases.map(clase => `
+                                <tr>
+                                    <td>${clase.id_clase}</td>
+                                    <td>${clase.nombre}</td>
+                                    <td>${clase.nombre_profesor ?? ""} ${clase.apellido_profesor ?? ("(ID " + clase.id_profesor + ")")}</td>
+                                    <td>${clase.dia_semana ?? "-"}</td>
+                                    <td>${formatearHora(clase.hora_inicio)} - ${formatearHora(clase.hora_fin)}</td>
+                                    <td>${clase.cupo_maximo ?? "-"}</td>
+                                    <td>${clase.estado ?? "-"}</td>
+                                    <td>
+                                        <a href="modificar-clase.html?id=${clase.id_clase}" class="button is-small is-warning">Editar</a>
+                                        <a href="eliminar-clase.html?id=${clase.id_clase}" class="button is-small is-danger">Eliminar</a>
+                                    </td>
+                                </tr>
+                            `).join("");
+
+                        } catch (error) {
+                            tbody.innerHTML = `<tr><td colspan="8" class="has-text-centered has-text-danger">Error al cargar las clases: ${error.message}</td></tr>`;
+                        }
+                    }
+
+                    cargarClases();
+                </script>
             </div>
-        </body>
-    </html>
+        </div>
+    </body>
+</html>

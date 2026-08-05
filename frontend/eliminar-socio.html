@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+                </div>
+
+                <div id="navbarBasicExample" class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="index.html">Home</a>
+                        <a class="navbar-item" href="socios.html">Socios</a>
+                        <a class="navbar-item" href="clases.html">Clases</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Rutinas</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
+                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                            </div>
+                        </div>
+
+                        <a class="navbar-item" href="profesores.html">Profesores</a>
+                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Reportes</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="content">
+                <h1 class="title is-1">Eliminar Socio</h1>
+                <p class="subtitle mt-4">Esta acción no se puede deshacer.</p>
+
+                <div id="mensaje-carga"></div>
+
+                <div id="confirmacion" style="display: none;">
+                    <div class="notification is-warning">
+                        <p>¿Estás seguro que querés eliminar a <strong id="nombre-socio"></strong>?</p>
+                    </div>
+
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button id="btn-confirmar" class="button is-danger">Sí, eliminar</button>
+                        </div>
+                        <div class="control">
+                            <a href="socios.html" class="button is-light">Cancelar</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mensaje" class="mt-4"></div>
+            </div>
+        </div>
+
+        <script>
+            const params = new URLSearchParams(window.location.search);
+            const idSocio = params.get("id");
+            const API_URL = `http://localhost:3000/api/socios/${idSocio}`;
+
+            const mensajeCargaDiv = document.getElementById("mensaje-carga");
+            const confirmacionDiv = document.getElementById("confirmacion");
+            const mensajeDiv = document.getElementById("mensaje");
+            const nombreSocioEl = document.getElementById("nombre-socio");
+
+            async function cargarSocio() {
+                if (!idSocio) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué socio eliminar.</div>`;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(API_URL);
+
+                    if (!response.ok) {
+                        throw new Error("Socio no encontrado");
+                    }
+
+                    const socio = await response.json();
+                    nombreSocioEl.textContent = `${socio.nombre} ${socio.apellido} (DNI: ${socio.dni})`;
+                    confirmacionDiv.style.display = "block";
+
+                } catch (error) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar el socio: ${error.message}</div>`;
+                }
+            }
+
+            document.getElementById("btn-confirmar").addEventListener("click", async () => {
+                mensajeDiv.innerHTML = "";
+
+                try {
+                    const response = await fetch(API_URL, { method: "DELETE" });
+                    const data = await response.json().catch(() => null);
+
+                    if (!response.ok) {
+                        throw new Error(data?.error || `Error ${response.status}`);
+                    }
+
+                    confirmacionDiv.style.display = "none";
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Socio eliminado con éxito. <a href="socios.html">Volver al listado</a></div>`;
+
+                } catch (error) {
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">${error.message}</div>`;
+                }
+            });
+
+            cargarSocio();
+        </script>
+    </body>
+</html>

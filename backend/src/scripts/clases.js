@@ -9,19 +9,19 @@ async function getOneClase(id) {
   const result = await dbClient.query(`
     SELECT c.*, p.nombre AS nombre_profesor, p.apellido AS apellido_profesor
     FROM clases c
-    JOIN profesores p ON c.id_profesor = p.idprofesor
+    JOIN profesores p ON c.id_profesor = p.id_profesor
     WHERE c.id_clase = $1
     LIMIT 1
   `, [id]);
   return result.rows[0];
 }
 
-async function createClase(idProfesor, nombre, descripcion, diaSemana, horaInicio, horaFin, cupoMaximo, estado) {
+async function createClase(id_profesor, nombre, descripcion, diaSemana, horaInicio, horaFin, cupoMaximo, estado) {
   try {
     const result = await dbClient.query(
       `INSERT INTO clases (id_profesor, nombre, descripcion, dia_semana, hora_inicio, hora_fin, cupo_maximo, estado)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [idProfesor, nombre, descripcion, diaSemana, horaInicio, horaFin, cupoMaximo, estado]
+      [id_profesor, nombre, descripcion, diaSemana, horaInicio, horaFin, cupoMaximo, estado]
     );
     return result.rows[0];
   } catch (err) {
@@ -32,13 +32,13 @@ async function createClase(idProfesor, nombre, descripcion, diaSemana, horaInici
   }
 }
 
-async function updateClase(id, idProfesor, nombre, descripcion, diaSemana, horaInicio, horaFin, cupoMaximo, estado) {
+async function updateClase(id, id_profesor, nombre, descripcion, diaSemana, horaInicio, horaFin, cupoMaximo, estado) {
   try {
     const result = await dbClient.query(
       `UPDATE clases SET id_profesor = $1, nombre = $2, descripcion = $3, dia_semana = $4,
        hora_inicio = $5, hora_fin = $6, cupo_maximo = $7, estado = $8, fecha_modificacion = NOW()
        WHERE id_clase = $9 RETURNING *`,
-      [idProfesor, nombre, descripcion, diaSemana, horaInicio, horaFin, cupoMaximo, estado, id]
+      [id_profesor, nombre, descripcion, diaSemana, horaInicio, horaFin, cupoMaximo, estado, id]
     );
     if (result.rowCount === 0) {
       return { error: 'not_found' };

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+                </div>
+
+                <div id="navbarBasicExample" class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="index.html">Home</a>
+                        <a class="navbar-item" href="socios.html">Socios</a>
+                        <a class="navbar-item" href="clases.html">Clases</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Rutinas</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="arma_rutina.html">Arma tu rutina</a>
+                                <a class="navbar-item" href="detalleRutina.html">Ver detalle de rutinas</a>
+                            </div>
+                        </div>
+
+                        <a class="navbar-item" href="profesores.html">Profesores</a>
+                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Reportes</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="detalleReporte.html">Ver detalle de reportes</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="content">
+                <h1 class="title is-1">Crear Profesor</h1>
+                <p class="subtitle mt-4">Completá los datos para registrar un nuevo profesor en el sistema.</p>
+
+                <form id="form-crear-profesor">
+                    <div class="field">
+                        <label class="label">Nombre</label>
+                        <div class="control">
+                            <input class="input" type="text" id="nombre" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Apellido</label>
+                        <div class="control">
+                            <input class="input" type="text" id="apellido" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">DNI</label>
+                        <div class="control">
+                            <input class="input" type="text" id="dni" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Teléfono</label>
+                        <div class="control">
+                            <input class="input" type="text" id="telefono" placeholder="10 dígitos, sin espacios" pattern="[0-9]{10}" maxlength="10" required>
+                        </div>
+                        <p class="help">Debe tener exactamente 10 dígitos numéricos</p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Mail</label>
+                        <div class="control">
+                            <input class="input" type="email" id="mail" required>
+                        </div>
+                    </div>
+
+                    <div class="field is-grouped mt-5">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">Crear Profesor</button>
+                        </div>
+                        <div class="control">
+                            <a href="profesores.html" class="button is-light">Cancelar</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="mensaje" class="mt-4"></div>
+            </div>
+        </div>
+
+        <script>
+            const API_URL = "http://localhost:3000/api/profesores";
+
+            document.getElementById("form-crear-profesor").addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const mensajeDiv = document.getElementById("mensaje");
+                mensajeDiv.innerHTML = "";
+
+                const nuevoProfesor = {
+                    nombre: document.getElementById("nombre").value,
+                    apellido: document.getElementById("apellido").value,
+                    dni: document.getElementById("dni").value,
+                    telefono: document.getElementById("telefono").value,
+                    mail: document.getElementById("mail").value
+                };
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(nuevoProfesor)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => null);
+                        throw new Error(errorData?.error || `Error ${response.status}`);
+                    }
+
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Profesor creado con éxito. Redirigiendo...</div>`;
+                    
+                    setTimeout(() => {
+                        window.location.href = "profesores.html";
+                    }, 1500);
+
+                } catch (error) {
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al crear el profesor: ${error.message}</div>`;
+                }
+            });
+        </script>
+    </body>
+</html>
