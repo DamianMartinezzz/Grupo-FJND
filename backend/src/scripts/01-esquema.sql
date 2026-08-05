@@ -12,7 +12,7 @@ CREATE TABLE Socios (
 );
 
 CREATE TABLE Profesores (
-    IdProfesor SERIAL PRIMARY KEY,
+    Id_Profesor SERIAL PRIMARY KEY,
     Nombre VARCHAR(100) NOT NULL,
     Apellido VARCHAR(100) NOT NULL,
     DNI VARCHAR(20) UNIQUE NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE Rutinas (
     Fecha_Modificacion TIMESTAMP,
     Estado VARCHAR(50),
     CONSTRAINT fk_rutina_socio FOREIGN KEY (Id_Socio) REFERENCES Socios(Id_Socio),
-    CONSTRAINT fk_rutina_profesor FOREIGN KEY (Id_Profesor) REFERENCES Profesores(IdProfesor)
+    CONSTRAINT fk_rutina_profesor FOREIGN KEY (Id_Profesor) REFERENCES Profesores(Id_Profesor)
 );
 
 CREATE TABLE DetalleRutina (
@@ -87,7 +87,7 @@ CREATE TABLE Clases (
     Cupo_Maximo INT,
     Estado VARCHAR(50),
     Fecha_Modificacion TIMESTAMP,
-    CONSTRAINT fk_clase_profesor FOREIGN KEY (Id_Profesor) REFERENCES Profesores(IdProfesor)
+    CONSTRAINT fk_clase_profesor FOREIGN KEY (Id_Profesor) REFERENCES Profesores(Id_Profesor)
 );
 
 CREATE TABLE Usuario_Clase (

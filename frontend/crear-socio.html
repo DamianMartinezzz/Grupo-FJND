@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+                </div>
+
+                <div id="navbarBasicExample" class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="index.html">Home</a>
+                        <a class="navbar-item" href="socios.html">Socios</a>
+                        <a class="navbar-item" href="clases.html">Clases</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Rutinas</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="arma_rutina.html">Arma tu rutina</a>
+                                <a class="navbar-item" href="detalleRutina.html">Ver detalle de rutinas</a>
+                            </div>
+                        </div>
+
+                        <a class="navbar-item" href="profesores.html">Profesores</a>
+                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Reportes</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="detalleReporte.html">Ver detalle de reportes</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="content">
+                <h1 class="title is-1">Crear Socio</h1>
+                <p class="subtitle mt-4">Completá los datos para registrar un nuevo socio en el sistema.</p>
+
+                <form id="form-crear-socio">
+                    <div class="field">
+                        <label class="label">Nombre</label>
+                        <div class="control">
+                            <input class="input" type="text" id="nombre" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Apellido</label>
+                        <div class="control">
+                            <input class="input" type="text" id="apellido" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">DNI</label>
+                        <div class="control">
+                            <input class="input" type="text" id="dni" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Teléfono</label>
+                        <div class="control">
+                            <input class="input" type="text" id="telefono" placeholder="10 dígitos, sin espacios" pattern="[0-9]{10}" maxlength="10" required>
+                        </div>
+                        <p class="help">Debe tener exactamente 10 dígitos numéricos</p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Mail</label>
+                        <div class="control">
+                            <input class="input" type="email" id="mail" required>
+                        </div>
+                    </div>
+                        
+                        <div class="field">
+                            <label class="label">Fecha de Nacimiento</label>
+                            <div class="control">
+                                <input class="input" type="date" id="fecha_nacimiento" min="1920-01-01" max="2020-12-31">
+                            </div>
+                            <p class="help">La persona debe tener entre 5 y 105 años aproximadamente</p>
+                        </div>
+
+                    <div class="field is-grouped mt-5">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">Crear Socio</button>
+                        </div>
+                        <div class="control">
+                            <a href="socios.html" class="button is-light">Cancelar</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="mensaje" class="mt-4"></div>
+            </div>
+        </div>
+
+        <script>
+            const API_URL = "http://localhost:3000/api/socios";
+
+            document.getElementById("form-crear-socio").addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const mensajeDiv = document.getElementById("mensaje");
+                mensajeDiv.innerHTML = "";
+
+                const nuevoSocio = {
+                    nombre: document.getElementById("nombre").value,
+                    apellido: document.getElementById("apellido").value,
+                    dni: document.getElementById("dni").value,
+                    telefono: document.getElementById("telefono").value,
+                    mail: document.getElementById("mail").value,
+                    fecha_nacimiento: document.getElementById("fecha_nacimiento").value || null
+                };
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(nuevoSocio)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => null);
+                        throw new Error(errorData?.error || `Error ${response.status}`);
+                    }
+
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Socio creado con éxito. Redirigiendo...</div>`;
+                    
+                    // Redirige automáticamente a la lista de socios después de 1 segundo y medio
+                    setTimeout(() => {
+                        window.location.href = "socios.html";
+                    }, 1500);
+
+                } catch (error) {
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al crear el socio: ${error.message}</div>`;
+                }
+            });
+        </script>
+    </body>
+</html>

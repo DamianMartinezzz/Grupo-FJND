@@ -11,11 +11,11 @@ async function getOneSocio(id) {
     return result.rows[0];
 }
 
-async function createSocio(nombre, apellido, dni, mail, telefono) {
+async function createSocio(nombre, apellido, dni, mail, telefono, fecha_nacimiento) {
     try {
         const result = await dbClient.query(
-            'INSERT INTO socios (nombre, apellido, dni, mail, telefono) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [nombre, apellido, dni, mail, telefono]);
+            'INSERT INTO socios (nombre, apellido, dni, mail, telefono, fecha_nacimiento, fecha_alta) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *',
+            [nombre, apellido, dni, mail, telefono, fecha_nacimiento]);
 
         if (result.rowCount === 0) {
             return undefined;
@@ -23,7 +23,7 @@ async function createSocio(nombre, apellido, dni, mail, telefono) {
             return result.rows[0];
         }
     } catch (err) {
-        if (err.code === '23505') { // unique_violation (DNI duplicado)
+        if (err.code === '23505') {
             return { error: 'duplicate_dni' };
         }
         throw err;
@@ -45,10 +45,10 @@ async function deleteSocio(id) {
   }
 }
 
-async function updateSocio(id, nombre, apellido, dni, mail, telefono) {
+async function updateSocio(id, nombre, apellido, dni, mail, telefono, fecha_nacimiento) {
   const result = await dbClient.query(
-    'UPDATE socios SET nombre = $1, apellido = $2, dni = $3, mail = $4, telefono = $5 WHERE id_socio = $6 RETURNING *',
-    [nombre, apellido, dni, mail, telefono, id]
+    'UPDATE socios SET nombre = $1, apellido = $2, dni = $3, mail = $4, telefono = $5, fecha_nacimiento = $6, fecha_modificacion = NOW() WHERE id_socio = $7 RETURNING *',
+    [nombre, apellido, dni, mail, telefono, fecha_nacimiento, id]
   );
 
   if (result.rowCount === 0) {
