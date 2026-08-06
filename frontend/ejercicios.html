@@ -6,47 +6,118 @@
     </head>
     <body>
         <div class="container is-fluid">
-            <nav class="navbar" role="navigation" aria-label="main navigation">
-                <div class="navbar-brand">
-                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
                 </div>
+            </div>
 
-                <div id="navbarBasicExample" class="navbar-menu">
-                    <div class="navbar-start">
-                        <a class="navbar-item" href="index.html">Home</a>
-                        <a class="navbar-item" href="socios.html">Socios</a>
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Clases</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="clases.html">Ver Clases</a>
-                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
-                            </div>
-                        </div>
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                </div>
+            </div>
 
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Rutinas</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
-                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
-                            </div>
-                        </div>
+            <a class="navbar-item" href="profesores.html">Profesores</a>
+            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
 
-                        <a class="navbar-item" href="profesores.html">Profesores</a>
-                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+       
+            <div class="container mt-5">
+                <h1 class="title is-1">Ejercicios</h1>
+                <p class="subtitle mt-3">Acá vas a poder gestionar todo lo relacionado a los ejercicios del gimnasio: alta, modificación y baja.</p>
 
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Reportes</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                <div class="columns is-centered mt-5">
+                    <div class="column is-narrow">
+                        <div class="card">
+                            <div class="card-content has-text-centered">
+                                <p class="title is-4">Crear Ejercicio</p>
+                                <p class="subtitle is-6">Registrá un nuevo ejercicio en el sistema</p>
+                                <a href="crear-ejercicio.html" class="button is-primary">Crear</a>
                             </div>
                         </div>
                     </div>
                 </div>
-            </nav>
-                    <div class="content">
-                        <h1>Ejercicios!</h1>
-                    </div>                        
-                </div>
+
+                <hr class="my-6">
+
+                <h2 class="title is-4 mb-4">Listado de Ejercicios</h2>
+
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Grupo Muscular</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-ejercicios">
+                        <tr>
+                            <td colspan="5" class="has-text-centered">Cargando ejercicios...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <script>
+                    const API_EJERCICIOS = "http://localhost:3000/api/ejercicios";
+
+                    async function cargarEjercicios() {
+                        const tbody = document.getElementById("tabla-ejercicios");
+
+                        try {
+                            const response = await fetch(API_EJERCICIOS);
+                            const ejercicios = await response.json();
+
+                            if (!ejercicios.length) {
+                                tbody.innerHTML = `<tr><td colspan="5" class="has-text-centered">No hay ejercicios registrados</td></tr>`;
+                                return;
+                            }
+
+                            tbody.innerHTML = ejercicios.map(ejercicio => `
+                                <tr>
+                                    <td>${ejercicio.id_ejercicio ?? ejercicio.id}</td>
+                                    <td>${ejercicio.nombre}</td>
+                                    <td>${ejercicio.grupo_muscular ?? ejercicio.grupoMuscular ?? "-"}</td>
+                                    <td>${ejercicio.descripcion ?? "-"}</td>
+                                    <td>
+                                        <a href="modificar-ejercicio.html?id=${ejercicio.id_ejercicio ?? ejercicio.id}" class="button is-small is-warning">Editar</a>
+                                        <a href="eliminar-ejercicio.html?id=${ejercicio.id_ejercicio ?? ejercicio.id}" class="button is-small is-danger">Eliminar</a>
+                                    </td>
+                                </tr>
+                            `).join("");
+
+                        } catch (error) {
+                            tbody.innerHTML = `<tr><td colspan="5" class="has-text-centered has-text-danger">Error al cargar los ejercicios: ${error.message}</td></tr>`;
+                        }
+                    }
+
+                    cargarEjercicios();
+                </script>
             </div>
-        </body>
-    </html>
+        </div>
+    </body>
+</html>

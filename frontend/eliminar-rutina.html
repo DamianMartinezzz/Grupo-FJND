@@ -45,15 +45,15 @@
     </div>
 </nav>
 
-            <div class="content">
-                <h1 class="title is-1">Eliminar Clase</h1>
-                <p class="subtitle mt-4">Esta acción no se puede deshacer.</p>
+            <div class="container mt-5">
+                <h1 class="title is-1">Eliminar Rutina</h1>
+                <p class="subtitle mt-3">Esta acción no se puede deshacer.</p>
 
                 <div id="mensaje-carga"></div>
 
                 <div id="confirmacion" style="display: none;">
                     <div class="notification is-warning">
-                        <p>¿Estás seguro que querés eliminar la clase <strong id="nombre-clase"></strong>?</p>
+                        <p>¿Estás seguro que querés eliminar la rutina <strong id="nombre-rutina"></strong>?</p>
                     </div>
 
                     <div class="field is-grouped">
@@ -61,7 +61,7 @@
                             <button id="btn-confirmar" class="button is-danger">Sí, eliminar</button>
                         </div>
                         <div class="control">
-                            <a href="clases.html" class="button is-light">Cancelar</a>
+                            <a href="armar-rutina.html" class="button is-light">Cancelar</a>
                         </div>
                     </div>
                 </div>
@@ -72,17 +72,16 @@
 
         <script>
             const params = new URLSearchParams(window.location.search);
-            const idClase = params.get("id");
-            const API_URL = `http://localhost:3000/api/clases/${idClase}`;
+            const idRutina = params.get("id");
+            const API_URL = `http://localhost:3000/api/rutinas/${idRutina}`;
 
             const mensajeCargaDiv = document.getElementById("mensaje-carga");
             const confirmacionDiv = document.getElementById("confirmacion");
             const mensajeDiv = document.getElementById("mensaje");
-            const nombreClaseEl = document.getElementById("nombre-clase");
 
-            async function cargarClase() {
-                if (!idClase) {
-                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué clase eliminar.</div>`;
+            async function cargarRutina() {
+                if (!idRutina) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué rutina eliminar.</div>`;
                     return;
                 }
 
@@ -90,15 +89,15 @@
                     const response = await fetch(API_URL);
 
                     if (!response.ok) {
-                        throw new Error("Clase no encontrada");
+                        throw new Error("Rutina no encontrada");
                     }
 
-                    const clase = await response.json();
-                    nombreClaseEl.textContent = clase.nombre;
+                    const rutina = await response.json();
+                    document.getElementById("nombre-rutina").textContent = rutina.nombre;
                     confirmacionDiv.style.display = "block";
 
                 } catch (error) {
-                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar la clase: ${error.message}</div>`;
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar la rutina: ${error.message}</div>`;
                 }
             }
 
@@ -114,14 +113,14 @@
                     }
 
                     confirmacionDiv.style.display = "none";
-                    mensajeDiv.innerHTML = `<div class="notification is-success">Clase eliminada con éxito. <a href="clases.html">Volver al listado</a></div>`;
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Rutina eliminada con éxito. <a href="armar-rutina.html">Volver al listado</a></div>`;
 
                 } catch (error) {
                     mensajeDiv.innerHTML = `<div class="notification is-danger">${error.message}</div>`;
                 }
             });
 
-            cargarClase();
+            cargarRutina();
         </script>
     </body>
 </html>

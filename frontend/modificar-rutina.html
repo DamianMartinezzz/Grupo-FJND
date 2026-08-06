@@ -44,17 +44,29 @@
         </div>
     </div>
 </nav>
-            <div class="content">
-                <h1 class="title is-1">Modificar Clase</h1>
-                <p class="subtitle mt-4">Actualizá los datos de la clase seleccionada.</p>
+
+            <div class="container mt-5">
+                <h1 class="title is-1">Modificar Rutina</h1>
+                <p class="subtitle mt-3">Actualizá los datos de la rutina seleccionada.</p>
 
                 <div id="mensaje-carga"></div>
 
-                <form id="form-modificar-clase" style="display: none;">
+                <form id="form-modificar-rutina" style="display: none;">
                     <div class="field">
                         <label class="label">Nombre</label>
                         <div class="control">
                             <input class="input" type="text" id="nombre" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Socio</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="id_socio" required>
+                                    <option value="">Cargando socios...</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -69,46 +81,14 @@
                         </div>
                     </div>
 
-                    <div class="field">
-                        <label class="label">Descripción</label>
-                        <div class="control">
-                            <textarea class="textarea" id="descripcion"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Día de la semana</label>
-                        <div class="control">
-                            <div class="select is-fullwidth">
-                                <select id="dia_semana">
-                                    <option value="">Seleccioná un día</option>
-                                    <option value="Lunes">Lunes</option>
-                                    <option value="Martes">Martes</option>
-                                    <option value="Miércoles">Miércoles</option>
-                                    <option value="Jueves">Jueves</option>
-                                    <option value="Viernes">Viernes</option>
-                                    <option value="Sábado">Sábado</option>
-                                    <option value="Domingo">Domingo</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="field is-grouped">
                         <div class="control is-expanded">
-                            <label class="label">Hora de inicio</label>
-                            <input class="input" type="time" id="hora_inicio">
+                            <label class="label">Fecha de Inicio</label>
+                            <input class="input" type="date" id="fecha_inicio">
                         </div>
                         <div class="control is-expanded">
-                            <label class="label">Hora de fin</label>
-                            <input class="input" type="time" id="hora_fin">
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Cupo Máximo</label>
-                        <div class="control">
-                            <input class="input" type="number" id="cupo_maximo" min="1">
+                            <label class="label">Fecha de Fin</label>
+                            <input class="input" type="date" id="fecha_fin">
                         </div>
                     </div>
 
@@ -129,7 +109,7 @@
                             <button type="submit" class="button is-warning">Guardar Cambios</button>
                         </div>
                         <div class="control">
-                            <a href="clases.html" class="button is-light">Cancelar</a>
+                            <a href="armar-rutina.html" class="button is-light">Cancelar</a>
                         </div>
                     </div>
                 </form>
@@ -140,34 +120,38 @@
 
         <script>
             const params = new URLSearchParams(window.location.search);
-            const idClase = params.get("id");
-            const API_CLASES = "http://localhost:3000/api/clases";
+            const idRutina = params.get("id");
+            const API_RUTINAS = "http://localhost:3000/api/rutinas";
+            const API_SOCIOS = "http://localhost:3000/api/socios";
             const API_PROFESORES = "http://localhost:3000/api/profesores";
-            const API_URL = `${API_CLASES}/${idClase}`;
+            const API_URL = `${API_RUTINAS}/${idRutina}`;
 
             const mensajeCargaDiv = document.getElementById("mensaje-carga");
-            const form = document.getElementById("form-modificar-clase");
+            const form = document.getElementById("form-modificar-rutina");
             const mensajeDiv = document.getElementById("mensaje");
 
-            async function cargarProfesores(idProfesorActual) {
-                const select = document.getElementById("id_profesor");
+            async function cargarSelects(idSocioActual, idProfesorActual) {
+                const [sociosRes, profesoresRes] = await Promise.all([
+                    fetch(API_SOCIOS),
+                    fetch(API_PROFESORES)
+                ]);
+                const socios = await sociosRes.json();
+                const profesores = await profesoresRes.json();
 
-                try {
-                    const response = await fetch(API_PROFESORES);
-                    const profesores = await response.json();
+                const selectSocio = document.getElementById("id_socio");
+                selectSocio.innerHTML = socios.map(s =>
+                    `<option value="${s.id_socio}" ${s.id_socio == idSocioActual ? "selected" : ""}>${s.nombre} ${s.apellido}</option>`
+                ).join("");
 
-                    select.innerHTML = profesores.map(p =>
-                        `<option value="${p.id_profesor}" ${p.id_profesor == idProfesorActual ? "selected" : ""}>${p.nombre} ${p.apellido}</option>`
-                    ).join("");
-
-                } catch (error) {
-                    select.innerHTML = `<option value="">Error al cargar profesores</option>`;
-                }
+                const selectProfesor = document.getElementById("id_profesor");
+                selectProfesor.innerHTML = profesores.map(p =>
+                    `<option value="${p.id_profesor}" ${p.id_profesor == idProfesorActual ? "selected" : ""}>${p.nombre} ${p.apellido}</option>`
+                ).join("");
             }
 
-            async function cargarClase() {
-                if (!idClase) {
-                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué clase modificar.</div>`;
+            async function cargarRutina() {
+                if (!idRutina) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué rutina modificar.</div>`;
                     return;
                 }
 
@@ -175,25 +159,22 @@
                     const response = await fetch(API_URL);
 
                     if (!response.ok) {
-                        throw new Error("Clase no encontrada");
+                        throw new Error("Rutina no encontrada");
                     }
 
-                    const clase = await response.json();
+                    const rutina = await response.json();
 
-                    document.getElementById("nombre").value = clase.nombre;
-                    document.getElementById("descripcion").value = clase.descripcion ?? "";
-                    document.getElementById("dia_semana").value = clase.dia_semana ?? "";
-                    document.getElementById("hora_inicio").value = clase.hora_inicio ? clase.hora_inicio.substring(0, 5) : "";
-                    document.getElementById("hora_fin").value = clase.hora_fin ? clase.hora_fin.substring(0, 5) : "";
-                    document.getElementById("cupo_maximo").value = clase.cupo_maximo ?? "";
-                    document.getElementById("estado").value = clase.estado ?? "Activa";
+                    document.getElementById("nombre").value = rutina.nombre;
+                    document.getElementById("fecha_inicio").value = rutina.fecha_inicio ? rutina.fecha_inicio.split("T")[0] : "";
+                    document.getElementById("fecha_fin").value = rutina.fecha_fin ? rutina.fecha_fin.split("T")[0] : "";
+                    document.getElementById("estado").value = rutina.estado ?? "Activa";
 
-                    await cargarProfesores(clase.id_profesor);
+                    await cargarSelects(rutina.id_socio, rutina.id_profesor);
 
                     form.style.display = "block";
 
                 } catch (error) {
-                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar la clase: ${error.message}</div>`;
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar la rutina: ${error.message}</div>`;
                 }
             }
 
@@ -201,14 +182,13 @@
                 e.preventDefault();
                 mensajeDiv.innerHTML = "";
 
-                const claseActualizada = {
+                const rutinaActualizada = {
+                    id_socio: document.getElementById("id_socio").value,
                     id_profesor: document.getElementById("id_profesor").value,
                     nombre: document.getElementById("nombre").value,
-                    descripcion: document.getElementById("descripcion").value || null,
-                    dia_semana: document.getElementById("dia_semana").value || null,
-                    hora_inicio: document.getElementById("hora_inicio").value || null,
-                    hora_fin: document.getElementById("hora_fin").value || null,
-                    cupo_maximo: document.getElementById("cupo_maximo").value || null,
+                    fecha_inicio: document.getElementById("fecha_inicio").value || null,
+                    fecha_fin: document.getElementById("fecha_fin").value || null,
+                    fecha_modificacion: new Date().toISOString().split("T")[0],
                     estado: document.getElementById("estado").value
                 };
 
@@ -216,7 +196,7 @@
                     const response = await fetch(API_URL, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(claseActualizada)
+                        body: JSON.stringify(rutinaActualizada)
                     });
 
                     if (!response.ok) {
@@ -224,18 +204,18 @@
                         throw new Error(errorData?.error || `Error ${response.status}`);
                     }
 
-                    mensajeDiv.innerHTML = `<div class="notification is-success">Clase actualizada con éxito. Volviendo al listado... <a href="clases.html">Volver ahora</a></div>`;
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Rutina actualizada con éxito. Volviendo al listado... <a href="armar-rutina.html">Volver ahora</a></div>`;
 
                     setTimeout(() => {
-                        window.location.href = "clases.html";
+                        window.location.href = "armar-rutina.html";
                     }, 1500);
 
                 } catch (error) {
-                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al actualizar la clase: ${error.message}</div>`;
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al actualizar la rutina: ${error.message}</div>`;
                 }
             });
 
-            cargarClase();
+            cargarRutina();
         </script>
     </body>
 </html>

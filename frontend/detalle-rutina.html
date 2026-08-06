@@ -4,50 +4,177 @@
         <title>Gimnasio</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     </head>
-                <body>
-                    <div class="container is-fluid">
-                        <nav class="navbar" role="navigation" aria-label="main navigation">
-                            <div class="navbar-brand">
-                                <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
-                    </div>
+    <body>
+        <div class="container is-fluid">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+                </div>
 
-                    <div id="navbarBasicExample" class="navbar-menu">
-                        <div class="navbar-start">
-                            <a class="navbar-item" href="index.html">Home</a>
-                            <a class="navbar-item" href="socios.html">Socios</a>
-                            <a class="navbar-item" href="clases.html">Clases</a>
-                            <!-- Menú desplegable para Rutinas -->
-            <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link" href="rutinas.html">
-                Rutinas
-              </a>
-              <div class="navbar-dropdown">
-                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
-                <a class="navbar-item" href="detalleRutina.html">Ver detalle de rutinas</a>
-              </div>
-            </div>
+                <div id="navbarBasicExample" class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="index.html">Home</a>
+                        <a class="navbar-item" href="socios.html">Socios</a>
 
-            <!-- Estos dos quedan como enlaces simples -->
-            <a class="navbar-item" href="profesores.html">Profesores</a>
-            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Clases</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="clases.html">Ver Clases</a>
+                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                            </div>
+                        </div>
 
-            <!-- Menú desplegable para Reportes -->
-            <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link" href="reportes.html">
-                Reportes
-              </a>
-              <div class="navbar-dropdown">
-                <a class="navbar-item" href="detalleReporte.html">Ver detalle de reportes</a>
-                                    </div>
-                                </div>
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Rutinas</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                            </div>
+                        </div>
+
+                        <a class="navbar-item" href="profesores.html">Profesores</a>
+                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Reportes</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
                             </div>
                         </div>
                     </div>
-                </nav>
-                    <div class="content">
-                        <h1>Detalle de Rutinas!</h1>
-                    </div>                        
                 </div>
+            </nav>
+
+            <div class="container mt-5">
+                <h1 class="title is-1">Detalle de Rutinas</h1>
+                <p class="subtitle mt-3">Elegí una rutina para ver y gestionar los ejercicios de los socios.</p>
+
+                <div class="field mt-5">
+                    <label class="label">Rutina</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select id="id_rutina">
+                                <option value="">Cargando rutinas...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="seccion-detalle" style="display: none;">
+                    <div class="field mt-4">
+                        <a href="#" id="btn-agregar" class="button is-primary">+ Agregar Ejercicio a esta Rutina</a>
+                    </div>
+
+                    <hr class="my-6">
+
+                    <h2 class="title is-4 mb-4">Ejercicios de la rutina</h2>
+
+                    <table class="table is-fullwidth is-striped is-hoverable">
+                        <thead>
+                            <tr>
+                                <th>Día</th>
+                                <th>Orden</th>
+                                <th>Ejercicio</th>
+                                <th>Series</th>
+                                <th>Repeticiones</th>
+                                <th>Descanso</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-detalle">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="mensaje-sin-rutina" class="mt-5 has-text-grey">Seleccioná una rutina para ver su detalle.</div>
+
+                <script>
+                    const API_RUTINAS = "http://localhost:3000/api/rutinas";
+                    const API_EJERCICIOS = "http://localhost:3000/api/ejercicios";
+
+                    let mapaEjercicios = {};
+
+                    async function cargarRutinas() {
+                        const select = document.getElementById("id_rutina");
+                        const response = await fetch(API_RUTINAS);
+                        const rutinas = await response.json();
+
+                        select.innerHTML = `<option value="">Seleccioná una rutina</option>` +
+                            rutinas.map(r => `<option value="${r.id_rutina}">${r.nombre}</option>`).join("");
+                    }
+
+                    async function cargarEjerciciosMapa() {
+                        const response = await fetch(API_EJERCICIOS);
+                        const ejercicios = await response.json();
+                        mapaEjercicios = Object.fromEntries(ejercicios.map(e => [e.id_ejercicio, e.nombre]));
+                    }
+
+                    async function cargarDetalle(idRutina) {
+                        const seccion = document.getElementById("seccion-detalle");
+                        const mensajeSinRutina = document.getElementById("mensaje-sin-rutina");
+                        const tbody = document.getElementById("tabla-detalle");
+                        const btnAgregar = document.getElementById("btn-agregar");
+
+                        if (!idRutina) {
+                            seccion.style.display = "none";
+                            mensajeSinRutina.style.display = "block";
+                            return;
+                        }
+
+                        mensajeSinRutina.style.display = "none";
+                        seccion.style.display = "block";
+                        btnAgregar.href = `crear-detalle-rutina.html?id_rutina=${idRutina}`;
+
+                        tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered">Cargando...</td></tr>`;
+
+                        try {
+                            const response = await fetch(`${API_RUTINAS}/${idRutina}/detalles`);
+                            const detalles = await response.json();
+
+                            if (!detalles.length) {
+                                tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered">Esta rutina todavía no tiene ejercicios cargados</td></tr>`;
+                                return;
+                            }
+
+                            tbody.innerHTML = detalles.map(d => `
+                                <tr>
+                                    <td>${d.dia}</td>
+                                    <td>${d.orden}</td>
+                                    <td>${mapaEjercicios[d.id_ejercicio] ?? ("Ejercicio ID " + d.id_ejercicio)}</td>
+                                    <td>${d.series}</td>
+                                    <td>${d.repeticiones_desde} - ${d.repeticiones_hasta}</td>
+                                    <td>${d.descanso ?? "-"}${d.descanso ? "s" : ""}</td>
+                                    <td>
+                                        <a href="modificar-detalle-rutina.html?id=${d.id_detalle}&id_rutina=${idRutina}" class="button is-small is-warning">Editar</a>
+                                        <a href="eliminar-detalle-rutina.html?id=${d.id_detalle}&id_rutina=${idRutina}" class="button is-small is-danger">Eliminar</a>
+                                    </td>
+                                </tr>
+                            `).join("");
+
+                        } catch (error) {
+                            tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered has-text-danger">Error al cargar el detalle: ${error.message}</td></tr>`;
+                        }
+                    }
+
+                    document.getElementById("id_rutina").addEventListener("change", (e) => {
+                        cargarDetalle(e.target.value);
+                    });
+
+                    async function init() {
+                        await Promise.all([cargarRutinas(), cargarEjerciciosMapa()]);
+
+                        // Si venimos de crear/editar un detalle, volvemos con la rutina preseleccionada
+                        const params = new URLSearchParams(window.location.search);
+                        const idRutinaPreseleccionada = params.get("id_rutina");
+                        if (idRutinaPreseleccionada) {
+                            document.getElementById("id_rutina").value = idRutinaPreseleccionada;
+                            cargarDetalle(idRutinaPreseleccionada);
+                        }
+                    }
+
+                    init();
+                </script>
             </div>
-        </body>
-    </html>
+        </div>
+    </body>
+</html>

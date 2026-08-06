@@ -6,47 +6,136 @@
     </head>
     <body>
         <div class="container is-fluid">
-            <nav class="navbar" role="navigation" aria-label="main navigation">
-                <div class="navbar-brand">
-                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
                 </div>
+            </div>
 
-                <div id="navbarBasicExample" class="navbar-menu">
-                    <div class="navbar-start">
-                        <a class="navbar-item" href="index.html">Home</a>
-                        <a class="navbar-item" href="socios.html">Socios</a>
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Clases</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="clases.html">Ver Clases</a>
-                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
-                            </div>
-                        </div>
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                </div>
+            </div>
 
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Rutinas</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
-                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
-                            </div>
-                        </div>
+            <a class="navbar-item" href="profesores.html">Profesores</a>
+            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
 
-                        <a class="navbar-item" href="profesores.html">Profesores</a>
-                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+            <div class="container mt-5">
+                <h1 class="title is-1">Inscripciones</h1>
+                <p class="subtitle mt-3">Gestioná qué socios están anotados a cada clase.</p>
 
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Reportes</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                <div class="columns is-centered mt-5">
+                    <div class="column is-narrow">
+                        <div class="card">
+                            <div class="card-content has-text-centered">
+                                <p class="title is-4">Nueva Inscripción</p>
+                                <p class="subtitle is-6">Anotá a un socio en una clase</p>
+                                <a href="crear-inscripcion.html" class="button is-primary">Crear</a>
                             </div>
                         </div>
                     </div>
                 </div>
-            </nav>
-                    <div class="content">
-                        <h1>Inscripciones!</h1>
-                    </div>                        
-                </div>
+
+                <hr class="my-6">
+
+                <h2 class="title is-4 mb-4">Listado de Inscripciones</h2>
+
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Socio</th>
+                            <th>Clase</th>
+                            <th>Fecha Inscripción</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-inscripciones">
+                        <tr>
+                            <td colspan="6" class="has-text-centered">Cargando inscripciones...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <script>
+                    const API_INSCRIPCIONES = "http://localhost:3000/api/socio-clase";
+                    const API_SOCIOS = "http://localhost:3000/api/socios";
+                    const API_CLASES = "http://localhost:3000/api/clases";
+
+                    function formatearFecha(fecha) {
+                        if (!fecha) return "-";
+                        return new Date(fecha).toLocaleDateString('es-AR');
+                    }
+
+                    async function cargarInscripciones() {
+                        const tbody = document.getElementById("tabla-inscripciones");
+
+                        try {
+                            const [inscripcionesRes, sociosRes, clasesRes] = await Promise.all([
+                                fetch(API_INSCRIPCIONES),
+                                fetch(API_SOCIOS),
+                                fetch(API_CLASES)
+                            ]);
+
+                            const inscripciones = await inscripcionesRes.json();
+                            const socios = await sociosRes.json();
+                            const clases = await clasesRes.json();
+
+                            const mapaSocios = Object.fromEntries(socios.map(s => [s.id_socio, `${s.nombre} ${s.apellido}`]));
+                            const mapaClases = Object.fromEntries(clases.map(c => [c.id_clase, c.nombre]));
+
+                            if (!inscripciones.length) {
+                                tbody.innerHTML = `<tr><td colspan="6" class="has-text-centered">No hay inscripciones registradas</td></tr>`;
+                                return;
+                            }
+
+                            tbody.innerHTML = inscripciones.map(insc => `
+                                <tr>
+                                    <td>${insc.id_usuario_clase}</td>
+                                    <td>${mapaSocios[insc.id_usuario] ?? ("Socio ID " + insc.id_usuario)}</td>
+                                    <td>${mapaClases[insc.id_clase] ?? ("Clase ID " + insc.id_clase)}</td>
+                                    <td>${formatearFecha(insc.fecha_inscripcion)}</td>
+                                    <td>${insc.estado ?? "-"}</td>
+                                    <td>
+                                        <a href="modificar-inscripcion.html?id=${insc.id_usuario_clase}" class="button is-small is-warning">Editar</a>
+                                        <a href="eliminar-inscripcion.html?id=${insc.id_usuario_clase}" class="button is-small is-danger">Eliminar</a>
+                                    </td>
+                                </tr>
+                            `).join("");
+
+                        } catch (error) {
+                            tbody.innerHTML = `<tr><td colspan="6" class="has-text-centered has-text-danger">Error al cargar las inscripciones: ${error.message}</td></tr>`;
+                        }
+                    }
+
+                    cargarInscripciones();
+                </script>
             </div>
-        </body>
-    </html>
+        </div>
+    </body>
+</html>

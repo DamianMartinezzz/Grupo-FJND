@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+                </div>
+
+                <div id="navbarBasicExample" class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="index.html">Home</a>
+                        <a class="navbar-item" href="socios.html">Socios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Clases</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="clases.html">Ver Clases</a>
+                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                            </div>
+                        </div>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Rutinas</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                            </div>
+                        </div>
+
+                        <a class="navbar-item" href="profesores.html">Profesores</a>
+                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Reportes</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container mt-5">
+                <h1 class="title is-1">Modificar Ejercicio de la Rutina</h1>
+                <p class="subtitle mt-3">Actualizá los datos de este ejercicio dentro de la rutina.</p>
+
+                <div id="mensaje-carga"></div>
+
+                <form id="form-modificar-detalle" style="display: none;">
+                    <div class="field">
+                        <label class="label">Ejercicio</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="id_ejercicio" required>
+                                    <option value="">Cargando ejercicios...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field is-grouped">
+                        <div class="control is-expanded">
+                            <label class="label">Día</label>
+                            <input class="input" type="number" id="dia" min="1" required>
+                        </div>
+                        <div class="control is-expanded">
+                            <label class="label">Orden</label>
+                            <input class="input" type="number" id="orden" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Series</label>
+                        <div class="control">
+                            <input class="input" type="number" id="series" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="field is-grouped">
+                        <div class="control is-expanded">
+                            <label class="label">Repeticiones desde</label>
+                            <input class="input" type="number" id="repeticiones_desde" min="1" required>
+                        </div>
+                        <div class="control is-expanded">
+                            <label class="label">Repeticiones hasta</label>
+                            <input class="input" type="number" id="repeticiones_hasta" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Descanso (segundos)</label>
+                        <div class="control">
+                            <input class="input" type="number" id="descanso" min="0">
+                        </div>
+                    </div>
+
+                    <div class="field is-grouped mt-5">
+                        <div class="control">
+                            <button type="submit" class="button is-warning">Guardar Cambios</button>
+                        </div>
+                        <div class="control">
+                            <a href="#" id="btn-cancelar" class="button is-light">Cancelar</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="mensaje" class="mt-4"></div>
+            </div>
+        </div>
+
+        <script>
+            const params = new URLSearchParams(window.location.search);
+            const idDetalle = params.get("id");
+            const idRutina = params.get("id_rutina");
+
+            const API_RUTINAS = "http://localhost:3000/api/rutinas";
+            const API_EJERCICIOS = "http://localhost:3000/api/ejercicios";
+            const API_DETALLE = "http://localhost:3000/api/detalle-rutina";
+
+            const mensajeCargaDiv = document.getElementById("mensaje-carga");
+            const form = document.getElementById("form-modificar-detalle");
+            const mensajeDiv = document.getElementById("mensaje");
+
+            const urlVolver = idRutina ? `detalle-rutina.html?id_rutina=${idRutina}` : "detalle-rutina.html";
+            document.getElementById("btn-cancelar").href = urlVolver;
+
+            async function cargarDetalle() {
+                if (!idDetalle) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué ejercicio modificar.</div>`;
+                    return;
+                }
+
+                try {
+                    const [detalleRes, ejerciciosRes] = await Promise.all([
+                        fetch(`${API_DETALLE}/${idDetalle}`),
+                        fetch(API_EJERCICIOS)
+                    ]);
+
+                    if (!detalleRes.ok) {
+                        throw new Error("No se encontró ese ejercicio");
+                    }
+
+                    const detalle = await detalleRes.json();
+                    const ejercicios = await ejerciciosRes.json();
+
+                    const select = document.getElementById("id_ejercicio");
+                    select.innerHTML = ejercicios.map(e =>
+                        `<option value="${e.id_ejercicio}" ${e.id_ejercicio == detalle.id_ejercicio ? "selected" : ""}>${e.nombre}</option>`
+                    ).join("");
+
+                    document.getElementById("dia").value = detalle.dia;
+                    document.getElementById("orden").value = detalle.orden;
+                    document.getElementById("series").value = detalle.series;
+                    document.getElementById("repeticiones_desde").value = detalle.repeticiones_desde;
+                    document.getElementById("repeticiones_hasta").value = detalle.repeticiones_hasta;
+                    document.getElementById("descanso").value = detalle.descanso ?? "";
+
+                    form.style.display = "block";
+
+                } catch (error) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar el ejercicio: ${error.message}</div>`;
+                }
+            }
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                mensajeDiv.innerHTML = "";
+
+                const detalleActualizado = {
+                    id_rutina: idRutina,
+                    id_ejercicio: document.getElementById("id_ejercicio").value,
+                    dia: document.getElementById("dia").value,
+                    orden: document.getElementById("orden").value,
+                    series: document.getElementById("series").value,
+                    repeticiones_desde: document.getElementById("repeticiones_desde").value,
+                    repeticiones_hasta: document.getElementById("repeticiones_hasta").value,
+                    descanso: document.getElementById("descanso").value || null
+                };
+
+                try {
+                    const response = await fetch(`${API_DETALLE}/${idDetalle}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(detalleActualizado)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => null);
+                        throw new Error(errorData?.error || `Error ${response.status}`);
+                    }
+
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Ejercicio actualizado con éxito. Volviendo al detalle... <a href="${urlVolver}">Volver ahora</a></div>`;
+
+                    setTimeout(() => {
+                        window.location.href = urlVolver;
+                    }, 1500);
+
+                } catch (error) {
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al actualizar el ejercicio: ${error.message}</div>`;
+                }
+            });
+
+            cargarDetalle();
+        </script>
+    </body>
+</html>

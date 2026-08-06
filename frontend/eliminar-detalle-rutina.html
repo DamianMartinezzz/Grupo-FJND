@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+            <nav class="navbar" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+                </div>
+
+                <div id="navbarBasicExample" class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="index.html">Home</a>
+                        <a class="navbar-item" href="socios.html">Socios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Clases</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="clases.html">Ver Clases</a>
+                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                            </div>
+                        </div>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Rutinas</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                            </div>
+                        </div>
+
+                        <a class="navbar-item" href="profesores.html">Profesores</a>
+                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">Reportes</a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container mt-5">
+                <h1 class="title is-1">Eliminar Ejercicio de la Rutina</h1>
+                <p class="subtitle mt-3">Esta acción no se puede deshacer.</p>
+
+                <div id="mensaje-carga"></div>
+
+                <div id="confirmacion" style="display: none;">
+                    <div class="notification is-warning">
+                        <p>¿Estás seguro que querés quitar <strong id="nombre-ejercicio"></strong> (Día <span id="dia-detalle"></span>) de esta rutina?</p>
+                    </div>
+
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button id="btn-confirmar" class="button is-danger">Sí, eliminar</button>
+                        </div>
+                        <div class="control">
+                            <a href="#" id="btn-cancelar" class="button is-light">Cancelar</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mensaje" class="mt-4"></div>
+            </div>
+        </div>
+
+        <script>
+            const params = new URLSearchParams(window.location.search);
+            const idDetalle = params.get("id");
+            const idRutina = params.get("id_rutina");
+
+            const API_RUTINAS = "http://localhost:3000/api/rutinas";
+            const API_EJERCICIOS = "http://localhost:3000/api/ejercicios";
+            const API_DETALLE = "http://localhost:3000/api/detalle-rutina";
+
+            const mensajeCargaDiv = document.getElementById("mensaje-carga");
+            const confirmacionDiv = document.getElementById("confirmacion");
+            const mensajeDiv = document.getElementById("mensaje");
+
+            const urlVolver = idRutina ? `detalle-rutina.html?id_rutina=${idRutina}` : "detalle-rutina.html";
+            document.getElementById("btn-cancelar").href = urlVolver;
+
+            async function cargarDetalle() {
+                if (!idDetalle) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué ejercicio eliminar.</div>`;
+                    return;
+                }
+
+                try {
+                    const [detalleRes, ejerciciosRes] = await Promise.all([
+                        fetch(`${API_DETALLE}/${idDetalle}`),
+                        fetch(API_EJERCICIOS)
+                    ]);
+
+                    if (!detalleRes.ok) {
+                        throw new Error("No se encontró ese ejercicio");
+                    }
+
+                    const detalle = await detalleRes.json();
+                    const ejercicios = await ejerciciosRes.json();
+                    const ejercicio = ejercicios.find(e => e.id_ejercicio == detalle.id_ejercicio);
+
+                    document.getElementById("nombre-ejercicio").textContent = ejercicio ? ejercicio.nombre : `Ejercicio ID ${detalle.id_ejercicio}`;
+                    document.getElementById("dia-detalle").textContent = detalle.dia;
+
+                    confirmacionDiv.style.display = "block";
+
+                } catch (error) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar el ejercicio: ${error.message}</div>`;
+                }
+            }
+
+            document.getElementById("btn-confirmar").addEventListener("click", async () => {
+                mensajeDiv.innerHTML = "";
+
+                try {
+                    const response = await fetch(`${API_DETALLE}/${idDetalle}`, { method: "DELETE" });
+                    const data = await response.json().catch(() => null);
+
+                    if (!response.ok) {
+                        throw new Error(data?.error || `Error ${response.status}`);
+                    }
+
+                    confirmacionDiv.style.display = "none";
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Ejercicio eliminado con éxito. <a href="${urlVolver}">Volver al detalle</a></div>`;
+
+                } catch (error) {
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">${error.message}</div>`;
+                }
+            });
+
+            cargarDetalle();
+        </script>
+    </body>
+</html>
