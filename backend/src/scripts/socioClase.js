@@ -22,7 +22,7 @@ async function createSocioClase(id_socio, id_clase, fecha_inscripcion, fecha_baj
     try {
         await dbClient.query('BEGIN');
 
-        // Bloqueamos la fila de la clase para evitar condiciones de carrera
+        // Bloqueo la fila de la clase para evitar condiciones de carrera
         const claseResult = await dbClient.query(
             'SELECT cupo_maximo FROM clases WHERE id_clase = $1 FOR UPDATE',
             [id_clase]
@@ -35,7 +35,7 @@ async function createSocioClase(id_socio, id_clase, fecha_inscripcion, fecha_baj
 
         const cupoMaximo = claseResult.rows[0].cupo_maximo;
 
-        // Solo validamos cupo si el estado que entra es 'Inscripto'
+        // Solo se valida cupo si el estado que entra es 'Inscripto'
         if (estado === 'Inscripto') {
             const countResult = await dbClient.query(
                 "SELECT COUNT(*) FROM usuario_clase WHERE id_clase = $1 AND estado = 'Inscripto'",
@@ -85,7 +85,7 @@ async function updateSocioClase(id, id_socio, id_clase, fecha_inscripcion, fecha
   try {
     await dbClient.query('BEGIN');
 
-    // 1. Verificamos que la inscripción a modificar exista
+    // 1. Verifico que la inscripción a modificar exista
     const inscripcionActual = await dbClient.query(
         'SELECT * FROM usuario_clase WHERE id_usuario_clase = $1',
         [id]
@@ -110,7 +110,7 @@ async function updateSocioClase(id, id_socio, id_clase, fecha_inscripcion, fecha
 
         const cupoMaximo = claseResult.rows[0].cupo_maximo;
 
-        // Contamos excluyendo la inscripción actual por si solo estamos editando datos sin cambiar de clase
+        // Cuento excluyendo la inscripción actual por si solo se esta editando datos sin cambiar de clase
         const countResult = await dbClient.query(
             "SELECT COUNT(*) FROM usuario_clase WHERE id_clase = $1 AND estado = 'Inscripto' AND id_usuario_clase != $2",
             [id_clase, id]
@@ -123,7 +123,6 @@ async function updateSocioClase(id, id_socio, id_clase, fecha_inscripcion, fecha
         }
     }
 
-    // 3. Ejecutamos el update
     const result = await dbClient.query(
       'UPDATE usuario_clase SET id_usuario = $1, id_clase = $2, fecha_inscripcion = $3, fecha_baja = $4, estado = $5 WHERE id_usuario_clase = $6 RETURNING *',
       [id_socio, id_clase, fecha_inscripcion, fecha_baja, estado, id]

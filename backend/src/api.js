@@ -56,6 +56,7 @@ const {
  
 const {
     getAllDetalleRutina,
+    getOneDetalleRutina,
     getDetallesByRutina,
     createDetalleRutina,
     updateDetalleRutina,
@@ -496,13 +497,20 @@ app.delete('/api/rutinas/:id', async (req, res) => {
 });
 
 // Detalle Rutina
-// (CRUD directo por id_detalle, ademas del GET anidado de arriba)
 
 app.get('/api/detalle-rutina', async (req, res) => {
   const detalles = await getAllDetalleRutina();
   res.json(detalles);
 });
- 
+
+app.get('/api/detalle-rutina/:id', async (req, res) => {
+  const detalle = await getOneDetalleRutina(req.params.id);
+  if (!detalle) {
+    return res.status(404).json({ error: 'Detalle id: ' + req.params.id + ' not found' });
+  }
+  res.json(detalle);
+});
+
 app.post('/api/detalle-rutina', async (req, res) => {
   if (!req.body.id_rutina || !req.body.id_ejercicio || req.body.dia == null || req.body.orden == null || !req.body.series || !req.body.repeticiones_desde || !req.body.repeticiones_hasta) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -647,10 +655,24 @@ app.delete('/api/reportes/:id', async (req, res) => {
 // Detalle de reporte
 
 app.get('/api/detalle-reporte', async (req, res) => {
-  const detalles = await getAllDetalleReporte();
-  res.json(detalles);
+    try {
+        const detalles = await getAllDetalleReporte();
+        res.json(detalles);
+    } catch (error) {
+        res.status(500).json({ error: "Error al obtener los detalles de reporte" });
+    }
 });
- 
+
+app.get('/api/detalle-reporte/:id', async (req, res) => {
+  const detalle = await getOneDetalleReporte(req.params.id);
+  
+  if (!detalle) {
+    return res.status(404).json({ error: 'Detalle id: ' + req.params.id + ' not found' });
+  }
+  
+  res.json(detalle);
+});
+
 app.post('/api/detalle-reporte', async (req, res) => {
   if (!req.body.id_reporte || !req.body.id_ejercicio) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -725,7 +747,7 @@ app.get('/api/socio-clase/:id', async (req, res) => {
   }
   res.json(inscripcion);
 });
- 
+
 app.post('/api/socio-clase', async (req, res) => {
   if (!req.body.id_socio || !req.body.id_clase) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -741,6 +763,9 @@ app.post('/api/socio-clase', async (req, res) => {
  
   if (inscripcion && inscripcion.error === 'foreign_key') {
     return res.status(400).json({ error: 'El id_socio o id_clase indicado no existe' });
+  }
+  if (inscripcion && inscripcion.error === 'cupo_lleno') {
+    return res.status(409).json({ error: 'La clase ya alcanzó su cupo máximo' });
   }
   if (!inscripcion) {
     return res.status(500).json({ error: 'Failed to create inscripcion' });
@@ -764,6 +789,12 @@ app.put('/api/socio-clase/:id', async (req, res) => {
  
   if (inscripcion && inscripcion.error === 'foreign_key') {
     return res.status(400).json({ error: 'El id_socio o id_clase indicado no existe' });
+  }
+  if (inscripcion && inscripcion.error === 'not_found') {
+    return res.status(404).json({ error: 'Inscripcion id: ' + req.params.id + ' not found' });
+  }
+  if (inscripcion && inscripcion.error === 'cupo_lleno') {
+    return res.status(409).json({ error: 'La clase ya alcanzó su cupo máximo' });
   }
   if (!inscripcion) {
     return res.status(404).json({ error: 'Inscripcion id: ' + req.params.id + ' not found' });
