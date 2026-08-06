@@ -5,50 +5,134 @@
         <title>Gimnasio</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     </head>
-        <body>
-            <div class="container is-fluid">
-                <nav class="navbar" role="navigation" aria-label="main navigation">
-                            <div class="navbar-brand">
-                                <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
-                    </div>
+    <body>
+        <div class="container is-fluid">
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
 
-                    <div id="navbarBasicExample" class="navbar-menu">
-                        <div class="navbar-start">
-                            <a class="navbar-item" href="index.html">Home</a>
-                            <a class="navbar-item" href="socios.html">Socios</a>
-                            <a class="navbar-item" href="clases.html">Clases</a>
-                            <!-- Menú desplegable para Rutinas -->
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
             <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link" href="rutinas.html">
-                Rutinas
-              </a>
-              <div class="navbar-dropdown">
-                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
-                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
-              </div>
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                </div>
             </div>
 
-            <!-- Estos dos quedan como enlaces simples -->
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                </div>
+            </div>
+
             <a class="navbar-item" href="profesores.html">Profesores</a>
             <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
 
-            <!-- Menú desplegable para Reportes -->
             <div class="navbar-item has-dropdown is-hoverable">
-              <a class="navbar-link" href="reportes.html">
-                Reportes
-              </a>
-              <div class="navbar-dropdown">
-                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
-                                    </div>
-                                </div>
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+       
+            <div class="container mt-5">
+                <h1 class="title is-1">Detalle de Reportes</h1>
+                <p class="subtitle mt-3">Acá vas a poder gestionar el detalle de la actividad y los ejercicios realizados en los reportes.</p>
+
+                <div class="columns is-centered mt-5">
+                    <div class="column is-narrow">
+                        <div class="card">
+                            <div class="card-content has-text-centered">
+                                <p class="title is-4">Crear Detalle</p>
+                                <p class="subtitle is-6">Registrá un nuevo detalle de ejercicio en un reporte</p>
+                                <a href="crear-detalle-reporte.html" class="button is-primary">Crear</a>
                             </div>
                         </div>
                     </div>
-                </nav>
-                    <div class="content">
-                        <h1>Detalle de Reportes!</h1>
-                    </div>                        
                 </div>
+
+                <hr class="my-6">
+
+                <h2 class="title is-4 mb-4">Listado de Detalles de Reportes</h2>
+
+<div class="table-container">
+    <table class="table is-fullwidth is-striped is-hoverable">
+        <thead>
+            <tr>
+                <th>ID Detalle</th>
+                <th>Reporte</th>
+                <th>Socio</th> <!-- Nueva columna -->
+                <th>Ejercicio</th>
+                <th>Series</th>
+                <th>Repeticiones</th>
+                <th>Peso (kg)</th>
+                <th>Observaciones</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-detalles">
+            <tr>
+                <td colspan="9" class="has-text-centered">Cargando detalles...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+                <script>
+                    const API_DETALLE = "http://localhost:3000/api/detalle-reporte";
+
+                    async function cargarDetalles() {
+                        const tbody = document.getElementById("tabla-detalles");
+
+                        try {
+                            const response = await fetch(API_DETALLE);
+                            
+                            if (!response.ok) {
+                                throw new Error("Error en la respuesta del servidor al intentar obtener los datos.");
+                            }
+                            
+                            const detalles = await response.json();
+
+                            if (!detalles.length) {
+                                tbody.innerHTML = `<tr><td colspan="8" class="has-text-centered">No hay detalles de reportes registrados</td></tr>`;
+                                return;
+                            }
+                    tbody.innerHTML = detalles.map(detalle => `
+                    <tr>
+                        <td>${detalle.id_detalle}</td>
+                        <td>Reporte #${detalle.id_reporte}</td>
+                        <td>${detalle.socio}</td>
+                        <td>${detalle.ejercicio}</td>
+                        <td>${detalle.series_realizadas}</td>
+                        <td>${detalle.repeticiones_realizadas}</td>
+                        <td>${detalle.peso_utilizado}</td>
+                        <td>${detalle.observaciones}</td>
+                        <td>
+                            <a href="modificar-detalle-reporte.html?id=${detalle.id_detalle}" class="button is-small is-warning">Editar</a>
+                            <a href="eliminar-detalle-reporte.html?id=${detalle.id_detalle}" class="button is-small is-danger">Eliminar</a>
+                        </td>
+                    </tr>
+                    `).join("");
+
+                        } catch (error) {
+                            tbody.innerHTML = `<tr><td colspan="8" class="has-text-centered has-text-danger">Error al cargar los detalles: ${error.message}</td></tr>`;
+                        }
+                    }
+
+                    cargarDetalles();
+                </script>
             </div>
-        </body>
-    </html>
+        </div>
+    </body>
+</html>

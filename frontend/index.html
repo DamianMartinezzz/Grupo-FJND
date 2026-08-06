@@ -7,43 +7,44 @@
     </head>
     <body>
         <div class="container is-fluid">
-            <nav class="navbar" role="navigation" aria-label="main navigation">
-                <div class="navbar-brand">
-                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
                 </div>
+            </div>
 
-                <div id="navbarBasicExample" class="navbar-menu">
-                    <div class="navbar-start">
-                        <a class="navbar-item" href="index.html">Home</a>
-                        <a class="navbar-item" href="socios.html">Socios</a>
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Clases</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="clases.html">Ver Clases</a>
-                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
-                            </div>
-                        </div>
-
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Rutinas</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
-                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
-                            </div>
-                        </div>
-
-                        <a class="navbar-item" href="profesores.html">Profesores</a>
-                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
-
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Reportes</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
-                            </div>
-                        </div>
-                    </div>
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
                 </div>
-            </nav>
+            </div>
+
+            <a class="navbar-item" href="profesores.html">Profesores</a>
+            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
 
         <div class="container mt-5">
             <h1 class="title is-1">Hola!</h1>
@@ -155,8 +156,19 @@
                         </div>
                     `).join("");
                 }
-              const responseClases = await fetch("http://localhost:3000/api/clases");
+
+                const [responseClases, responseProfesores, responseInscripciones] = await Promise.all([
+                    fetch("http://localhost:3000/api/clases"),
+                    fetch("http://localhost:3000/api/profesores"),
+                    fetch("http://localhost:3000/api/socio-clase")
+                ]);
                 const clases = await responseClases.json();
+                const profesores = await responseProfesores.json();
+                const inscripciones = await responseInscripciones.json();
+
+                const mapaProfesores = Object.fromEntries(
+                    profesores.map(p => [p.id_profesor, `${p.nombre} ${p.apellido}`])
+                );
 
                 const tbodyAgenda = document.getElementById("tabla-agenda");
 
@@ -164,15 +176,18 @@
                     tbodyAgenda.innerHTML = `<tr><td colspan="4" class="has-text-centered">No hay clases programadas</td></tr>`;
                 } else {
                     tbodyAgenda.innerHTML = clases.map(clase => {
-                        const cupoLleno = clase.inscriptos >= clase.cupo_maximo;
+                        const inscriptosActuales = inscripciones.filter(
+                            i => i.id_clase === clase.id_clase && i.estado === 'Inscripto'
+                        ).length;
+                        const cupoLleno = clase.cupo_maximo !== null && inscriptosActuales >= clase.cupo_maximo;
                         return `
                             <tr>
-                                <td>${clase.hora ?? clase.hora_inicio ?? '-'}</td>
-                                <td>${clase.nombre_clase ?? clase.nombre ?? '-'}</td>
-                                <td>${clase.profesor ?? '-'}</td>
+                                <td>${clase.hora_inicio ?? '-'}</td>
+                                <td>${clase.nombre ?? '-'}</td>
+                                <td>${mapaProfesores[clase.id_profesor] ?? '-'}</td>
                                 <td>
                                     <span class="tag ${cupoLleno ? 'is-warning' : 'is-success'}">
-                                        ${clase.inscriptos ?? 0}/${clase.cupo_maximo ?? 0}
+                                        ${inscriptosActuales}/${clase.cupo_maximo ?? 0}
                                     </span>
                                 </td>
                             </tr>

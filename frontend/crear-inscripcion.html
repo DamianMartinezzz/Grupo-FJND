@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                </div>
+            </div>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                </div>
+            </div>
+
+            <a class="navbar-item" href="profesores.html">Profesores</a>
+            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+            <div class="content">
+                <h1 class="title is-1">Nueva Inscripción</h1>
+                <p class="subtitle mt-4">Anotá a un socio en una clase.</p>
+
+                <form id="form-crear-inscripcion">
+                    <div class="field">
+                        <label class="label">Socio</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="id_socio" required>
+                                    <option value="">Cargando socios...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Clase</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="id_clase" required>
+                                    <option value="">Cargando clases...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="help" id="info-cupo"></p>
+                    </div>
+
+                    <div class="field is-grouped mt-5">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">Inscribir</button>
+                        </div>
+                        <div class="control">
+                            <a href="inscripciones.html" class="button is-light">Cancelar</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="mensaje" class="mt-4"></div>
+            </div>
+        </div>
+
+        <script>
+            const API_INSCRIPCIONES = "http://localhost:3000/api/socio-clase";
+            const API_SOCIOS = "http://localhost:3000/api/socios";
+            const API_CLASES = "http://localhost:3000/api/clases";
+
+            let clasesData = [];
+            let inscripcionesData = [];
+
+            async function cargarSocios() {
+                const select = document.getElementById("id_socio");
+                const response = await fetch(API_SOCIOS);
+                const socios = await response.json();
+
+                select.innerHTML = `<option value="">Seleccioná un socio</option>` +
+                    socios.map(s => `<option value="${s.id_socio}">${s.nombre} ${s.apellido}</option>`).join("");
+            }
+
+            async function cargarClases() {
+                const select = document.getElementById("id_clase");
+
+                const [clasesRes, inscripcionesRes] = await Promise.all([
+                    fetch(API_CLASES),
+                    fetch(API_INSCRIPCIONES)
+                ]);
+
+                clasesData = await clasesRes.json();
+                inscripcionesData = await inscripcionesRes.json();
+
+                select.innerHTML = `<option value="">Seleccioná una clase</option>` +
+                    clasesData.map(c => `<option value="${c.id_clase}">${c.nombre} (${c.dia_semana ?? "-"})</option>`).join("");
+            }
+
+            document.getElementById("id_clase").addEventListener("change", (e) => {
+                const idClase = e.target.value;
+                const infoCupo = document.getElementById("info-cupo");
+
+                if (!idClase) {
+                    infoCupo.textContent = "";
+                    return;
+                }
+
+                const clase = clasesData.find(c => c.id_clase == idClase);
+                const inscriptosActuales = inscripcionesData.filter(
+                    i => i.id_clase == idClase && i.estado === "Inscripto"
+                ).length;
+
+                if (clase.cupo_maximo) {
+                    infoCupo.textContent = `Cupo: ${inscriptosActuales} / ${clase.cupo_maximo} ocupados`;
+                } else {
+                    infoCupo.textContent = "Esta clase no tiene límite de cupo definido";
+                }
+            });
+
+            document.getElementById("form-crear-inscripcion").addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const mensajeDiv = document.getElementById("mensaje");
+                mensajeDiv.innerHTML = "";
+
+                const nuevaInscripcion = {
+                    id_socio: document.getElementById("id_socio").value,
+                    id_clase: document.getElementById("id_clase").value,
+                    fecha_inscripcion: new Date().toISOString().split("T")[0],
+                    fecha_baja: null,
+                    estado: "Inscripto"
+                };
+
+                try {
+                    const response = await fetch(API_INSCRIPCIONES, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(nuevaInscripcion)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => null);
+                        throw new Error(errorData?.error || `Error ${response.status}`);
+                    }
+
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Inscripción creada con éxito. Volviendo al listado... <a href="inscripciones.html">Volver ahora</a></div>`;
+
+                    setTimeout(() => {
+                        window.location.href = "inscripciones.html";
+                    }, 1500);
+
+                } catch (error) {
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al crear la inscripción: ${error.message}</div>`;
+                }
+            });
+
+            cargarSocios();
+            cargarClases();
+        </script>
+    </body>
+</html>

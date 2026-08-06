@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                </div>
+            </div>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                </div>
+            </div>
+
+            <a class="navbar-item" href="profesores.html">Profesores</a>
+            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+       
+            <div class="container mt-5">
+                <h1 class="title is-1 has-text-danger">Eliminar Ejercicio</h1>
+                <p class="subtitle mt-3">Confirmá si realmente deseás dar de baja este ejercicio del sistema.</p>
+
+                <div class="columns is-centered mt-5">
+                    <div class="column is-half">
+                        <div id="mensaje" class="notification is-hidden"></div>
+
+                        <div id="card-confirmacion" class="card is-hidden">
+                            <div class="card-content has-text-centered">
+                                <p class="title is-4">¿Estás seguro?</p>
+                                <p class="is-size-5 has-text-weight-bold mt-4" id="nombre-ejercicio"></p>
+                                <p class="is-size-6 mt-2 has-text-grey" id="grupo-muscular"></p>
+
+                                <div class="buttons is-centered mt-6">
+                                    <button id="btn-eliminar" class="button is-danger">Sí, Eliminar de forma permanente</button>
+                                    <a href="ejercicios.html" class="button is-light">Cancelar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    const params = new URLSearchParams(window.location.search);
+                    const idEjercicio = params.get("id");
+                    const API_URL = `http://localhost:3000/api/ejercicios/${idEjercicio}`;
+                    
+                    const cardConfirmacion = document.getElementById("card-confirmacion");
+                    const mensaje = document.getElementById("mensaje");
+                    const btnEliminar = document.getElementById("btn-eliminar");
+
+                    async function cargarDatos() {
+                        try {
+                            const response = await fetch(API_URL);
+                            if (!response.ok) throw new Error("Ejercicio no encontrado");
+                            
+                            const data = await response.json();
+                            document.getElementById("nombre-ejercicio").textContent = data.nombre;
+                            document.getElementById("grupo-muscular").textContent = data.grupo_muscular || "";
+                            cardConfirmacion.classList.remove("is-hidden");
+                        } catch (error) {
+                            mostrarMensaje(error.message, "is-danger");
+                        }
+                    }
+
+                    btnEliminar.addEventListener("click", async () => {
+                        try {
+                            btnEliminar.classList.add("is-loading");
+                            const response = await fetch(API_URL, { method: "DELETE" });
+
+                            if (response.ok) {
+                                window.location.href = "ejercicios.html";
+                            } else if (response.status === 409) {
+                                mostrarMensaje("No se puede eliminar: el ejercicio está siendo utilizado en rutinas o reportes.", "is-warning");
+                                btnEliminar.classList.remove("is-loading");
+                                btnEliminar.disabled = true;
+                            } else {
+                                const errorData = await response.json();
+                                mostrarMensaje(errorData.error, "is-danger");
+                                btnEliminar.classList.remove("is-loading");
+                            }
+                        } catch (error) {
+                            mostrarMensaje("Error de conexión con el servidor", "is-danger");
+                            btnEliminar.classList.remove("is-loading");
+                        }
+                    });
+
+                    function mostrarMensaje(texto, clase) {
+                        mensaje.textContent = texto;
+                        mensaje.className = `notification ${clase}`;
+                        mensaje.classList.remove("is-hidden");
+                    }
+
+                    if (idEjercicio) {
+                        cargarDatos();
+                    } else {
+                        mostrarMensaje("No se especificó un ID válido", "is-danger");
+                    }
+                </script>
+            </div>
+        </div>
+    </body>
+</html>

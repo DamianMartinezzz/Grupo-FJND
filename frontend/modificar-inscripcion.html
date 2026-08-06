@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                </div>
+            </div>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                </div>
+            </div>
+
+            <a class="navbar-item" href="profesores.html">Profesores</a>
+            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+            <div class="container mt-5">
+                <h1 class="title is-1">Modificar Inscripción</h1>
+                <p class="subtitle mt-3">Cambiá el estado de la inscripción (por ejemplo, para dar de baja a un socio de una clase).</p>
+
+                <div id="mensaje-carga"></div>
+
+                <form id="form-modificar-inscripcion" style="display: none;">
+                    <div class="field">
+                        <label class="label">Socio</label>
+                        <div class="control">
+                            <input class="input" type="text" id="socio-display" disabled>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Clase</label>
+                        <div class="control">
+                            <input class="input" type="text" id="clase-display" disabled>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Estado</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="estado">
+                                    <option value="Inscripto">Inscripto</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p id="info-fecha-baja" class="is-size-5 has-text-weight-semibold mt-2"></p>
+                    </div>
+
+                    <div class="field is-grouped mt-5">
+                        <div class="control">
+                            <button type="submit" class="button is-warning">Guardar Cambios</button>
+                        </div>
+                        <div class="control">
+                            <a href="inscripciones.html" class="button is-light">Cancelar</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="mensaje" class="mt-4"></div>
+            </div>
+        </div>
+
+        <script>
+            const params = new URLSearchParams(window.location.search);
+            const idInscripcion = params.get("id");
+            const API_INSCRIPCIONES = "http://localhost:3000/api/socio-clase";
+            const API_SOCIOS = "http://localhost:3000/api/socios";
+            const API_CLASES = "http://localhost:3000/api/clases";
+            const API_URL = `${API_INSCRIPCIONES}/${idInscripcion}`;
+
+            const mensajeCargaDiv = document.getElementById("mensaje-carga");
+            const form = document.getElementById("form-modificar-inscripcion");
+            const mensajeDiv = document.getElementById("mensaje");
+
+            let idSocioActual, idClaseActual, fechaInscripcionActual, fechaBajaActual;
+
+            async function cargarInscripcion() {
+                if (!idInscripcion) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué inscripción modificar.</div>`;
+                    return;
+                }
+
+                try {
+                    const [inscripcionRes, sociosRes, clasesRes] = await Promise.all([
+                        fetch(API_URL),
+                        fetch(API_SOCIOS),
+                        fetch(API_CLASES)
+                    ]);
+
+                    if (!inscripcionRes.ok) {
+                        throw new Error("Inscripción no encontrada");
+                    }
+
+                    const inscripcion = await inscripcionRes.json();
+                    const socios = await sociosRes.json();
+                    const clases = await clasesRes.json();
+
+                    idSocioActual = inscripcion.id_usuario;
+                    idClaseActual = inscripcion.id_clase;
+                    fechaInscripcionActual = inscripcion.fecha_inscripcion;
+                    fechaBajaActual = inscripcion.fecha_baja;
+
+                    const socio = socios.find(s => s.id_socio == idSocioActual);
+                    const clase = clases.find(c => c.id_clase == idClaseActual);
+
+                    document.getElementById("socio-display").value = socio ? `${socio.nombre} ${socio.apellido}` : `Socio ID ${idSocioActual}`;
+                    document.getElementById("clase-display").value = clase ? clase.nombre : `Clase ID ${idClaseActual}`;
+                    document.getElementById("estado").value = inscripcion.estado ?? "Inscripto";
+
+                    actualizarInfoFechaBaja();
+
+                    form.style.display = "block";
+
+                } catch (error) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar la inscripción: ${error.message}</div>`;
+                }
+            }
+
+            function actualizarInfoFechaBaja() {
+                const estado = document.getElementById("estado").value;
+                const info = document.getElementById("info-fecha-baja");
+
+                if (estado === "Cancelado") {
+                    const fecha = fechaBajaActual ? fechaBajaActual.split("T")[0] : new Date().toISOString().split("T")[0];
+                    info.textContent = `Fecha de baja: ${new Date(fecha).toLocaleDateString('es-AR')}`;
+                } else {
+                    info.textContent = "";
+                }
+            }
+
+            document.getElementById("estado").addEventListener("change", actualizarInfoFechaBaja);
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                mensajeDiv.innerHTML = "";
+
+                const estadoSeleccionado = document.getElementById("estado").value;
+
+                // Si se cancela: usar la fecha de baja que ya tenía, o la de hoy si es la primera vez que se cancela.
+                // Si se reactiva (vuelve a "Inscripto"): se limpia la fecha de baja.
+                const fechaBajaCalculada = estadoSeleccionado === "Cancelado"
+                    ? (fechaBajaActual ?? new Date().toISOString().split("T")[0])
+                    : null;
+
+                const inscripcionActualizada = {
+                    id_socio: idSocioActual,
+                    id_clase: idClaseActual,
+                    fecha_inscripcion: fechaInscripcionActual,
+                    fecha_baja: fechaBajaCalculada,
+                    estado: estadoSeleccionado
+                };
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(inscripcionActualizada)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => null);
+                        throw new Error(errorData?.error || `Error ${response.status}`);
+                    }
+
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Inscripción actualizada con éxito. Volviendo al listado... <a href="inscripciones.html">Volver ahora</a></div>`;
+
+                    setTimeout(() => {
+                        window.location.href = "inscripciones.html";
+                    }, 1500);
+
+                } catch (error) {
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al actualizar la inscripción: ${error.message}</div>`;
+                }
+            });
+
+            cargarInscripcion();
+        </script>
+    </body>
+</html>

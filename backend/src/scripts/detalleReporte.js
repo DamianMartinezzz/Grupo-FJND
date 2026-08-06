@@ -1,8 +1,33 @@
 const { dbClient } = require('./gimnasio'); // Importo la conexion
 
 async function getAllDetalleReporte() {
-    const result = await dbClient.query('SELECT * FROM detallereporte');
-    return result.rows;
+    try {
+        const query = `
+            SELECT
+                dr.id_detalle,
+                dr.id_reporte,
+                s.nombre || ' ' || s.apellido AS socio,
+                e.nombre AS ejercicio,
+                dr.series_realizadas,
+                dr.repeticiones_realizadas,
+                dr.peso_utilizado,
+                dr.observaciones
+            FROM detallereporte dr
+            INNER JOIN reporte r
+                ON dr.id_reporte = r.id_reporte
+            INNER JOIN socios s
+                ON r.id_socio = s.id_socio
+            INNER JOIN ejercicios e
+                ON dr.id_ejercicio = e.id_ejercicio
+            ORDER BY dr.id_detalle;
+        `;
+
+        const result = await dbClient.query(query);
+        return result.rows;
+    } catch (error) {
+        console.error("Error al obtener los detalles de reporte:", error);
+        throw error;
+    }
 }
 
 async function getOneDetalleReporte(id) {

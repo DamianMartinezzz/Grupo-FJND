@@ -7,49 +7,50 @@
     </head>
     <body>
         <div class="container is-fluid">
-            <nav class="navbar" role="navigation" aria-label="main navigation">
-                <div class="navbar-brand">
-                    <a class="navbar-item" href="https://bulma.io">GIMNASIO APP</a>
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
                 </div>
+            </div>
 
-                <div id="navbarBasicExample" class="navbar-menu">
-                    <div class="navbar-start">
-                        <a class="navbar-item" href="index.html">Home</a>
-                        <a class="navbar-item" href="socios.html">Socios</a>
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Clases</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="clases.html">Ver Clases</a>
-                                <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
-                            </div>
-                        </div>
-
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Rutinas</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="arma-rutina.html">Arma tu rutina</a>
-                                <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
-                            </div>
-                        </div>
-
-                        <a class="navbar-item" href="profesores.html">Profesores</a>
-                        <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
-
-                        <div class="navbar-item has-dropdown is-hoverable">
-                            <a class="navbar-link">Reportes</a>
-                            <div class="navbar-dropdown">
-                                <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
-                            </div>
-                        </div>
-                    </div>
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
                 </div>
-            </nav>
+            </div>
 
-            <div class="content">
+            <a class="navbar-item" href="profesores.html">Profesores</a>
+            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+            <div class="container mt-5">
                 <h1 class="title is-1">Clases</h1>
-                <p class="subtitle mt-4">El administrador puede gestionar las clases del gimnasio: alta, modificación (hora, cupo, profesor, etc) y baja.</p>
+                <p class="subtitle mt-3">Gestioná las clases del gimnasio: alta, modificación y baja.</p>
 
-                <div class="columns is-centered">
+                <div class="columns is-centered mt-5">
                     <div class="column is-narrow">
                         <div class="card">
                             <div class="card-content has-text-centered">
@@ -61,9 +62,9 @@
                     </div>
                 </div>
 
-                <hr>
+                <hr class="my-6">
 
-                <h2 class="title is-3">Listado de Clases</h2>
+                <h2 class="title is-4 mb-4">Listado de Clases</h2>
 
                 <table class="table is-fullwidth is-striped is-hoverable">
                     <thead>
@@ -87,6 +88,7 @@
 
                 <script>
                     const API_CLASES = "http://localhost:3000/api/clases";
+                    const API_PROFESORES = "http://localhost:3000/api/profesores";
 
                     function formatearHora(hora) {
                         if (!hora) return "-";
@@ -97,8 +99,17 @@
                         const tbody = document.getElementById("tabla-clases");
 
                         try {
-                            const response = await fetch(API_CLASES);
-                            const clases = await response.json();
+                            const [clasesRes, profesoresRes] = await Promise.all([
+                                fetch(API_CLASES),
+                                fetch(API_PROFESORES)
+                            ]);
+
+                            const clases = await clasesRes.json();
+                            const profesores = await profesoresRes.json();
+
+                            const mapaProfesores = Object.fromEntries(
+                                profesores.map(p => [p.id_profesor, `${p.nombre} ${p.apellido}`])
+                            );
 
                             if (!clases.length) {
                                 tbody.innerHTML = `<tr><td colspan="8" class="has-text-centered">No hay clases registradas</td></tr>`;
@@ -109,7 +120,7 @@
                                 <tr>
                                     <td>${clase.id_clase}</td>
                                     <td>${clase.nombre}</td>
-                                    <td>${clase.nombre_profesor ?? ""} ${clase.apellido_profesor ?? ("(ID " + clase.id_profesor + ")")}</td>
+                                    <td>${mapaProfesores[clase.id_profesor] ?? ("Profesor ID " + clase.id_profesor)}</td>
                                     <td>${clase.dia_semana ?? "-"}</td>
                                     <td>${formatearHora(clase.hora_inicio)} - ${formatearHora(clase.hora_fin)}</td>
                                     <td>${clase.cupo_maximo ?? "-"}</td>

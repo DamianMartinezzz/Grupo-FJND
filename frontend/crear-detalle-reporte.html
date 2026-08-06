@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                </div>
+            </div>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                </div>
+            </div>
+
+            <a class="navbar-item" href="profesores.html">Profesores</a>
+            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+       
+            <div class="container mt-5" style="max-width: 600px;">
+                <h1 class="title is-3">Crear Detalle de Reporte</h1>
+                <p class="subtitle is-6">Registrá un nuevo detalle de ejercicio en el sistema</p>
+
+                <form id="formCrearDetalle" class="box">
+                    <div class="field">
+                        <label class="label">ID Rutina</label>
+                        <div class="control">
+                            <input class="input" type="number" id="id_rutina" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">ID Ejercicio</label>
+                        <div class="control">
+                            <input class="input" type="number" id="id_ejercicio" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Día</label>
+                        <div class="control">
+                            <input class="input" type="number" id="dia" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Orden</label>
+                        <div class="control">
+                            <input class="input" type="number" id="orden" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Series</label>
+                        <div class="control">
+                            <input class="input" type="number" id="series" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Repeticiones Desde</label>
+                        <div class="control">
+                            <input class="input" type="number" id="repeticiones_desde" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Repeticiones Hasta</label>
+                        <div class="control">
+                            <input class="input" type="number" id="repeticiones_hasta" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Descanso (segundos)</label>
+                        <div class="control">
+                            <input class="input" type="number" id="descanso">
+                        </div>
+                    </div>
+
+                    <div class="field is-grouped mt-5">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">Guardar Detalle</button>
+                        </div>
+                        <div class="control">
+                            <a href="detalle-reporte.html" class="button is-light">Cancelar</a>
+                        </div>
+                    </div>
+                </form>
+
+                <script>
+                    const API_DETALLE = "http://localhost:3000/api/detalle-reporte";
+
+                    document.getElementById('formCrearDetalle').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const data = {
+                            id_rutina: document.getElementById('id_rutina').value,
+                            id_ejercicio: document.getElementById('id_ejercicio').value,
+                            dia: document.getElementById('dia').value,
+                            orden: document.getElementById('orden').value,
+                            series: document.getElementById('series').value,
+                            repeticiones_desde: document.getElementById('repeticiones_desde').value,
+                            repeticiones_hasta: document.getElementById('repeticiones_hasta').value,
+                            descanso: document.getElementById('descanso').value || null
+                        };
+
+                        try {
+                            const response = await fetch(API_DETALLE, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data)
+                            });
+                            const result = await response.json();
+                            
+                            if (response.ok) {
+                                alert('Detalle creado con éxito');
+                                window.location.href = 'detalle-reporte.html';
+                            } else {
+                                alert('Error: ' + (result.error || 'No se pudo crear'));
+                            }
+                        } catch (error) {
+                            alert('Error de red al crear el detalle');
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+    </body>
+</html>

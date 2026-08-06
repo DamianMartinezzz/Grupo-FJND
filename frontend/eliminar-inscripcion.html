@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
     <head>
-        <meta charset="UTF-8">
         <title>Gimnasio</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     </head>
@@ -46,15 +45,15 @@
     </div>
 </nav>
 
-            <div class="content">
-                <h1 class="title is-1">Eliminar Socio</h1>
-                <p class="subtitle mt-4">Esta acción no se puede deshacer.</p>
+            <div class="container mt-5">
+                <h1 class="title is-1">Eliminar Inscripción</h1>
+                <p class="subtitle mt-3">Esta acción no se puede deshacer.</p>
 
                 <div id="mensaje-carga"></div>
 
                 <div id="confirmacion" style="display: none;">
                     <div class="notification is-warning">
-                        <p>¿Estás seguro que querés eliminar a <strong id="nombre-socio"></strong>?</p>
+                        <p>¿Estás seguro que querés eliminar la inscripción de <strong id="socio-nombre"></strong> a <strong id="clase-nombre"></strong>?</p>
                     </div>
 
                     <div class="field is-grouped">
@@ -62,7 +61,7 @@
                             <button id="btn-confirmar" class="button is-danger">Sí, eliminar</button>
                         </div>
                         <div class="control">
-                            <a href="socios.html" class="button is-light">Cancelar</a>
+                            <a href="inscripciones.html" class="button is-light">Cancelar</a>
                         </div>
                     </div>
                 </div>
@@ -73,33 +72,47 @@
 
         <script>
             const params = new URLSearchParams(window.location.search);
-            const idSocio = params.get("id");
-            const API_URL = `http://localhost:3000/api/socios/${idSocio}`;
+            const idInscripcion = params.get("id");
+            const API_INSCRIPCIONES = "http://localhost:3000/api/socio-clase";
+            const API_SOCIOS = "http://localhost:3000/api/socios";
+            const API_CLASES = "http://localhost:3000/api/clases";
+            const API_URL = `${API_INSCRIPCIONES}/${idInscripcion}`;
 
             const mensajeCargaDiv = document.getElementById("mensaje-carga");
             const confirmacionDiv = document.getElementById("confirmacion");
             const mensajeDiv = document.getElementById("mensaje");
-            const nombreSocioEl = document.getElementById("nombre-socio");
 
-            async function cargarSocio() {
-                if (!idSocio) {
-                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué socio eliminar.</div>`;
+            async function cargarInscripcion() {
+                if (!idInscripcion) {
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">No se especificó qué inscripción eliminar.</div>`;
                     return;
                 }
 
                 try {
-                    const response = await fetch(API_URL);
+                    const [inscripcionRes, sociosRes, clasesRes] = await Promise.all([
+                        fetch(API_URL),
+                        fetch(API_SOCIOS),
+                        fetch(API_CLASES)
+                    ]);
 
-                    if (!response.ok) {
-                        throw new Error("Socio no encontrado");
+                    if (!inscripcionRes.ok) {
+                        throw new Error("Inscripción no encontrada");
                     }
 
-                    const socio = await response.json();
-                    nombreSocioEl.textContent = `${socio.nombre} ${socio.apellido} (DNI: ${socio.dni})`;
+                    const inscripcion = await inscripcionRes.json();
+                    const socios = await sociosRes.json();
+                    const clases = await clasesRes.json();
+
+                    const socio = socios.find(s => s.id_socio == inscripcion.id_usuario);
+                    const clase = clases.find(c => c.id_clase == inscripcion.id_clase);
+
+                    document.getElementById("socio-nombre").textContent = socio ? `${socio.nombre} ${socio.apellido}` : `Socio ID ${inscripcion.id_usuario}`;
+                    document.getElementById("clase-nombre").textContent = clase ? clase.nombre : `Clase ID ${inscripcion.id_clase}`;
+
                     confirmacionDiv.style.display = "block";
 
                 } catch (error) {
-                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar el socio: ${error.message}</div>`;
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar la inscripción: ${error.message}</div>`;
                 }
             }
 
@@ -115,14 +128,14 @@
                     }
 
                     confirmacionDiv.style.display = "none";
-                    mensajeDiv.innerHTML = `<div class="notification is-success">Socio eliminado con éxito. <a href="socios.html">Volver al listado</a></div>`;
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Inscripción eliminada con éxito. <a href="inscripciones.html">Volver al listado</a></div>`;
 
                 } catch (error) {
                     mensajeDiv.innerHTML = `<div class="notification is-danger">${error.message}</div>`;
                 }
             });
 
-            cargarSocio();
+            cargarInscripcion();
         </script>
     </body>
 </html>

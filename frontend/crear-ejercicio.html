@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gimnasio</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    </head>
+    <body>
+        <div class="container is-fluid">
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <div class="navbar-item has-text-weight-bold is-size-4 has-text-primary" style="cursor: default;">GIMNASIO APP</div>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="index.html">Home</a>
+            <a class="navbar-item" href="socios.html">Socios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Clases</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="clases.html">Ver Clases</a>
+                    <a class="navbar-item" href="inscripciones.html">Inscripciones</a>
+                </div>
+            </div>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Rutinas</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="armar-rutina.html">Arma tu rutina</a>
+                    <a class="navbar-item" href="detalle-rutina.html">Ver detalle de rutinas</a>
+                </div>
+            </div>
+
+            <a class="navbar-item" href="profesores.html">Profesores</a>
+            <a class="navbar-item" href="ejercicios.html">Ejercicios</a>
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a class="navbar-link">Reportes</a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+       
+            <div class="container mt-5">
+                <h1 class="title is-1">Crear Ejercicio</h1>
+                <p class="subtitle mt-3">Completá los datos para registrar un nuevo ejercicio en el sistema.</p>
+
+                <div class="columns is-centered mt-5">
+                    <div class="column is-half">
+                        <div id="mensaje" class="notification is-hidden"></div>
+                        
+                        <div class="card">
+                            <div class="card-content">
+                                <form id="form-crear-ejercicio">
+                                    <div class="field">
+                                        <label class="label">Nombre del Ejercicio *</label>
+                                        <div class="control">
+                                            <input class="input" type="text" id="nombre" required placeholder="Ej: Press de Banca">
+                                        </div>
+                                    </div>
+
+                                    <div class="field">
+                                        <label class="label">Grupo Muscular</label>
+                                        <div class="control">
+                                            <input class="input" type="text" id="grupo_muscular" placeholder="Ej: Pecho">
+                                        </div>
+                                    </div>
+
+                                    <div class="field">
+                                        <label class="label">Descripción</label>
+                                        <div class="control">
+                                            <textarea class="textarea" id="descripcion" placeholder="Detalles de la técnica..."></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="field is-grouped mt-5">
+                                        <div class="control">
+                                            <button type="submit" class="button is-primary">Guardar</button>
+                                        </div>
+                                        <div class="control">
+                                            <a href="ejercicios.html" class="button is-light">Cancelar</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    const API_EJERCICIOS = "http://localhost:3000/api/ejercicios";
+                    const form = document.getElementById("form-crear-ejercicio");
+                    const mensaje = document.getElementById("mensaje");
+
+                    form.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        
+                        const nuevoEjercicio = {
+                            nombre: document.getElementById("nombre").value,
+                            grupo_muscular: document.getElementById("grupo_muscular").value,
+                            descripcion: document.getElementById("descripcion").value
+                        };
+
+                        try {
+                            const response = await fetch(API_EJERCICIOS, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(nuevoEjercicio)
+                            });
+
+                            if (response.ok) {
+                                window.location.href = "ejercicios.html";
+                            } else {
+                                const errorData = await response.json();
+                                mostrarMensaje(errorData.error || "Error al crear el ejercicio", "is-danger");
+                            }
+                        } catch (error) {
+                            mostrarMensaje("Error de conexión con el servidor", "is-danger");
+                        }
+                    });
+
+                    function mostrarMensaje(texto, clase) {
+                        mensaje.textContent = texto;
+                        mensaje.className = `notification ${clase}`;
+                        mensaje.classList.remove("is-hidden");
+                    }
+                </script>
+            </div>
+        </div>
+    </body>
+</html>

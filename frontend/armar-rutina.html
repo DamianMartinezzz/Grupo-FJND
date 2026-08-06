@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
     <head>
-        <meta charset="UTF-8">
         <title>Gimnasio</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     </head>
@@ -45,19 +44,18 @@
         </div>
     </div>
 </nav>
-       
-            <div class="container mt-5">
-                <h1 class="title is-1">Socios</h1>
-                <p class="subtitle mt-3">Acá vas a poder gestionar todo lo relacionado a los socios del gimnasio: alta, modificación y baja.</p>
 
-                
+            <div class="container mt-5">
+                <h1 class="title is-1">Rutinas</h1>
+                <p class="subtitle mt-3">Armá y gestioná las rutinas de entrenamiento de los socios.</p>
+
                 <div class="columns is-centered mt-5">
                     <div class="column is-narrow">
                         <div class="card">
                             <div class="card-content has-text-centered">
-                                <p class="title is-4">Crear Socio</p>
-                                <p class="subtitle is-6">Registrá un nuevo socio en el sistema</p>
-                                <a href="crear-socio.html" class="button is-primary">Crear</a>
+                                <p class="title is-4">Crear Rutina</p>
+                                <p class="subtitle is-6">Armá una nueva rutina para un socio</p>
+                                <a href="crear-rutina.html" class="button is-primary">Crear</a>
                             </div>
                         </div>
                     </div>
@@ -65,72 +63,82 @@
 
                 <hr class="my-6">
 
-                <h2 class="title is-4 mb-4">Listado de Socios</h2>
+                <h2 class="title is-4 mb-4">Listado de Rutinas</h2>
 
                 <table class="table is-fullwidth is-striped is-hoverable">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nombre</th>
-                            <th>Apellido</th>
-                            <th>DNI</th>
-                            <th>Teléfono</th>
-                            <th>Mail</th>
-                            <th>Fecha Nacimiento</th>
-                            <th>Fecha Alta</th>
+                            <th>Socio</th>
+                            <th>Profesor</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tabla-socios">
+                    <tbody id="tabla-rutinas">
                         <tr>
-                            <td colspan="9" class="has-text-centered">Cargando socios...</td>
+                            <td colspan="8" class="has-text-centered">Cargando rutinas...</td>
                         </tr>
                     </tbody>
                 </table>
 
                 <script>
+                    const API_RUTINAS = "http://localhost:3000/api/rutinas";
                     const API_SOCIOS = "http://localhost:3000/api/socios";
+                    const API_PROFESORES = "http://localhost:3000/api/profesores";
 
                     function formatearFecha(fecha) {
                         if (!fecha) return "-";
                         return new Date(fecha).toLocaleDateString('es-AR');
                     }
 
-                    async function cargarSocios() {
-                        const tbody = document.getElementById("tabla-socios");
+                    async function cargarRutinas() {
+                        const tbody = document.getElementById("tabla-rutinas");
 
                         try {
-                            const response = await fetch(API_SOCIOS);
-                            const socios = await response.json();
+                            const [rutinasRes, sociosRes, profesoresRes] = await Promise.all([
+                                fetch(API_RUTINAS),
+                                fetch(API_SOCIOS),
+                                fetch(API_PROFESORES)
+                            ]);
 
-                            if (!socios.length) {
-                                tbody.innerHTML = `<tr><td colspan="9" class="has-text-centered">No hay socios registrados</td></tr>`;
+                            const rutinas = await rutinasRes.json();
+                            const socios = await sociosRes.json();
+                            const profesores = await profesoresRes.json();
+
+                            const mapaSocios = Object.fromEntries(socios.map(s => [s.id_socio, `${s.nombre} ${s.apellido}`]));
+                            const mapaProfesores = Object.fromEntries(profesores.map(p => [p.id_profesor, `${p.nombre} ${p.apellido}`]));
+
+                            if (!rutinas.length) {
+                                tbody.innerHTML = `<tr><td colspan="8" class="has-text-centered">No hay rutinas registradas</td></tr>`;
                                 return;
                             }
 
-                            tbody.innerHTML = socios.map(socio => `
+                            tbody.innerHTML = rutinas.map(rutina => `
                                 <tr>
-                                    <td>${socio.id_socio}</td>
-                                    <td>${socio.nombre}</td>
-                                    <td>${socio.apellido}</td>
-                                    <td>${socio.dni}</td>
-                                    <td>${socio.telefono ?? "-"}</td>
-                                    <td>${socio.mail ?? "-"}</td>
-                                    <td>${formatearFecha(socio.fecha_nacimiento)}</td>
-                                    <td>${formatearFecha(socio.fecha_alta)}</td>
+                                    <td>${rutina.id_rutina}</td>
+                                    <td>${rutina.nombre}</td>
+                                    <td>${mapaSocios[rutina.id_socio] ?? ("Socio ID " + rutina.id_socio)}</td>
+                                    <td>${mapaProfesores[rutina.id_profesor] ?? ("Profesor ID " + rutina.id_profesor)}</td>
+                                    <td>${formatearFecha(rutina.fecha_inicio)}</td>
+                                    <td>${formatearFecha(rutina.fecha_fin)}</td>
+                                    <td>${rutina.estado ?? "-"}</td>
                                     <td>
-                                        <a href="modificar-socio.html?id=${socio.id_socio}" class="button is-small is-warning">Editar</a>
-                                        <a href="eliminar-socio.html?id=${socio.id_socio}" class="button is-small is-danger">Eliminar</a>
+                                        <a href="modificar-rutina.html?id=${rutina.id_rutina}" class="button is-small is-warning">Editar</a>
+                                        <a href="eliminar-rutina.html?id=${rutina.id_rutina}" class="button is-small is-danger">Eliminar</a>
                                     </td>
                                 </tr>
                             `).join("");
 
                         } catch (error) {
-                            tbody.innerHTML = `<tr><td colspan="9" class="has-text-centered has-text-danger">Error al cargar los socios: ${error.message}</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="8" class="has-text-centered has-text-danger">Error al cargar las rutinas: ${error.message}</td></tr>`;
                         }
                     }
 
-                    cargarSocios();
+                    cargarRutinas();
                 </script>
             </div>
         </div>
