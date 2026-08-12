@@ -9,7 +9,7 @@ async function getOneClase(id) {
   const result = await dbClient.query(`
     SELECT c.*, p.nombre AS nombre_profesor, p.apellido AS apellido_profesor
     FROM clases c
-    JOIN profesores p ON c.id_profesor = p.id_profesor
+    JOIN profesores p ON c.id_profesor = p.idprofesor
     WHERE c.id_clase = $1
     LIMIT 1
   `, [id]);

@@ -36,8 +36,8 @@ CREATE TABLE Rutinas (
     Fecha_Fin TIMESTAMP,
     Fecha_Modificacion TIMESTAMP,
     Estado VARCHAR(50),
-    CONSTRAINT fk_rutina_socio FOREIGN KEY (Id_Socio) REFERENCES Socios(Id_Socio),
-    CONSTRAINT fk_rutina_profesor FOREIGN KEY (Id_Profesor) REFERENCES Profesores(Id_Profesor)
+    CONSTRAINT fk_rutina_socio FOREIGN KEY (Id_Socio) REFERENCES Socios(Id_Socio) ON DELETE CASCADE,
+    CONSTRAINT fk_rutina_profesor FOREIGN KEY (Id_Profesor) REFERENCES Profesores(Id_Profesor) ON DELETE CASCADE
 );
 
 CREATE TABLE DetalleRutina (
@@ -50,8 +50,8 @@ CREATE TABLE DetalleRutina (
     Repeticiones_Desde INT NOT NULL,
     Repeticiones_Hasta INT NOT NULL,
     Descanso INT,
-    CONSTRAINT fk_detalle_rutina FOREIGN KEY (Id_Rutina) REFERENCES Rutinas(Id_Rutina),
-    CONSTRAINT fk_detalle_ejercicio FOREIGN KEY (Id_Ejercicio) REFERENCES Ejercicios(Id_Ejercicio)
+    CONSTRAINT fk_detalle_rutina FOREIGN KEY (Id_Rutina) REFERENCES Rutinas(Id_Rutina) ON DELETE CASCADE,
+    CONSTRAINT fk_detalle_ejercicio FOREIGN KEY (Id_Ejercicio) REFERENCES Ejercicios(Id_Ejercicio) ON DELETE CASCADE
 );
 
 CREATE TABLE Reporte (
@@ -60,8 +60,8 @@ CREATE TABLE Reporte (
     Id_Socio INT NOT NULL,
     Dia INT NOT NULL,
     Fecha_Asistencia TIMESTAMP NOT NULL,
-    CONSTRAINT fk_reporte_rutina FOREIGN KEY (Id_Rutina) REFERENCES Rutinas(Id_Rutina),
-    CONSTRAINT fk_reporte_usuario FOREIGN KEY (Id_Socio) REFERENCES Socios(Id_Socio)
+    CONSTRAINT fk_reporte_rutina FOREIGN KEY (Id_Rutina) REFERENCES Rutinas(Id_Rutina) ON DELETE CASCADE,
+    CONSTRAINT fk_reporte_usuario FOREIGN KEY (Id_Socio) REFERENCES Socios(Id_Socio) ON DELETE CASCADE
 );
 
 CREATE TABLE DetalleReporte (
@@ -72,8 +72,8 @@ CREATE TABLE DetalleReporte (
     Repeticiones_Realizadas INT,
     Peso_Utilizado NUMERIC(8,2),
     Observaciones TEXT,
-    CONSTRAINT fk_detalle_reporte FOREIGN KEY (Id_Reporte) REFERENCES Reporte(Id_Reporte),
-    CONSTRAINT fk_detalle_reporte_ej FOREIGN KEY (Id_Ejercicio) REFERENCES Ejercicios(Id_Ejercicio)
+    CONSTRAINT fk_detalle_reporte FOREIGN KEY (Id_Reporte) REFERENCES Reporte(Id_Reporte) ON DELETE CASCADE,
+    CONSTRAINT fk_detalle_reporte_ej FOREIGN KEY (Id_Ejercicio) REFERENCES Ejercicios(Id_Ejercicio) ON DELETE CASCADE
 );
 
 CREATE TABLE Clases (
@@ -87,7 +87,7 @@ CREATE TABLE Clases (
     Cupo_Maximo INT,
     Estado VARCHAR(50),
     Fecha_Modificacion TIMESTAMP,
-    CONSTRAINT fk_clase_profesor FOREIGN KEY (Id_Profesor) REFERENCES Profesores(Id_Profesor)
+    CONSTRAINT fk_clase_profesor FOREIGN KEY (Id_Profesor) REFERENCES Profesores(Id_Profesor) ON DELETE CASCADE
 );
 
 CREATE TABLE Usuario_Clase (
@@ -97,6 +97,6 @@ CREATE TABLE Usuario_Clase (
     Fecha_Inscripcion TIMESTAMP,
     Fecha_Baja TIMESTAMP,
     Estado VARCHAR(50),
-    CONSTRAINT fk_usuario_clase_usuario FOREIGN KEY (Id_Usuario) REFERENCES Socios(Id_Socio),
-    CONSTRAINT fk_usuario_clase_clase FOREIGN KEY (Id_Clase) REFERENCES Clases(Id_Clase)
+    CONSTRAINT fk_usuario_clase_usuario FOREIGN KEY (Id_Usuario) REFERENCES Socios(Id_Socio) ON DELETE CASCADE,
+    CONSTRAINT fk_usuario_clase_clase FOREIGN KEY (Id_Clase) REFERENCES Clases(Id_Clase) ON DELETE CASCADE
 );

@@ -71,6 +71,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Nombre</th>
+                            <th>Descripción</th>
                             <th>Profesor</th>
                             <th>Día</th>
                             <th>Horario</th>
@@ -120,6 +121,7 @@
                                 <tr>
                                     <td>${clase.id_clase}</td>
                                     <td>${clase.nombre}</td>
+                                    <td>${clase.descripcion}</td>
                                     <td>${mapaProfesores[clase.id_profesor] ?? ("Profesor ID " + clase.id_profesor)}</td>
                                     <td>${clase.dia_semana ?? "-"}</td>
                                     <td>${formatearHora(clase.hora_inicio)} - ${formatearHora(clase.hora_fin)}</td>

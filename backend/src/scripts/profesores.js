@@ -6,7 +6,7 @@ async function getAllProfesores() {
 }
 
 async function getOneProfesor(id) {
-  const result = await dbClient.query('SELECT * FROM profesores WHERE id_profesor = $1 LIMIT 1', [id]);
+  const result = await dbClient.query('SELECT * FROM profesores WHERE idprofesor = $1 LIMIT 1', [id]);
   return result.rows[0];
 }
 

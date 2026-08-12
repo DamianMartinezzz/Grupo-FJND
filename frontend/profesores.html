@@ -102,15 +102,15 @@
 
                             tbody.innerHTML = profesores.map(profesor => `
                                 <tr>
-                                    <td>${profesor.id_profesor ?? profesor.id}</td>
+                                    <td>${profesor.idprofesor ?? profesor.id}</td>
                                     <td>${profesor.nombre}</td>
                                     <td>${profesor.apellido}</td>
                                     <td>${profesor.dni}</td>
                                     <td>${profesor.telefono ?? "-"}</td>
                                     <td>${profesor.mail ?? profesor.email ?? "-"}</td>
                                     <td>
-                                        <a href="modificar-profesor.html?id=${profesor.id_profesor ?? profesor.id}" class="button is-small is-warning">Editar</a>
-                                        <a href="eliminar-profesor.html?id=${profesor.id_profesor ?? profesor.id}" class="button is-small is-danger">Eliminar</a>
+                                        <a href="modificar-profesor.html?id=${profesor.idprofesor ?? profesor.id}" class="button is-small is-warning">Editar</a>
+                                        <a href="eliminar-profesor.html?id=${profesor.idprofesor ?? profesor.id}" class="button is-small is-danger">Eliminar</a>
                                     </td>
                                 </tr>
                             `).join("");
