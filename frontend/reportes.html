@@ -48,16 +48,16 @@
 </nav>
        
             <div class="container mt-5">
-                <h1 class="title is-1">Profesores</h1>
-                <p class="subtitle mt-3">Acá vas a poder gestionar todo lo relacionado a los profesores del gimnasio: alta, modificación y baja.</p>
+                <h1 class="title is-1">Reportes</h1>
+                <p class="subtitle mt-3">Armá y gestiona todos los reportes</p>
 
                 <div class="columns is-centered mt-5">
                     <div class="column is-narrow">
                         <div class="card">
                             <div class="card-content has-text-centered">
-                                <p class="title is-4">Crear Profesor</p>
-                                <p class="subtitle is-6">Registrá un nuevo profesor en el sistema</p>
-                                <a href="crear-profesor.html" class="button is-primary">Crear</a>
+                                <p class="title is-4">Crear Reporte</p>
+                                <p class="subtitle is-6">Registrá un nuevo reporte en el sistema</p>
+                                <a href="crear-reporte.html" class="button is-primary">Crear</a>
                             </div>
                         </div>
                     </div>
@@ -71,57 +71,54 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Apellido</th>
-                            <th>DNI</th>
-                            <th>Teléfono</th>
-                            <th>Mail</th>
-                            <th>Acciones</th>
+                            <th>ID Rutina</th>
+                            <th>ID Socio</th>
+                            <th>Día</th>
+                            <th>Fecha Asistencia</th>
                         </tr>
                     </thead>
-                    <tbody id="tabla-profesores">
+                    <tbody id="tabla-reportes">
                         <tr>
-                            <td colspan="7" class="has-text-centered">Cargando profesores...</td>
+                            <td colspan="7" class="has-text-centered">Cargando reportes...</td>
                         </tr>
                     </tbody>
                 </table>
 
                 <script>
-                    const API_PROFESORES = "http://localhost:3000/api/profesores";
+                    const API_REPORTES = "http://localhost:3000/api/reportes";
 
-                    async function cargarProfesores() {
-                        const tbody = document.getElementById("tabla-profesores");
+                    async function cargarReportes() {
+                        const tbody = document.getElementById("tabla-reportes");
 
                         try {
-                            const response = await fetch(API_PROFESORES);
-                            const profesores = await response.json();
+                            const response = await fetch(API_REPORTES);
+                            const reportes = await response.json();
 
-                            if (!profesores.length) {
-                                tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered">No hay profesores registrados</td></tr>`;
+                            if (!reportes.length) {
+                                tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered">No hay reportes registrados</td></tr>`;
                                 return;
                             }
 
-                            tbody.innerHTML = profesores.map(profesor => `
+                            tbody.innerHTML = reportes.map(reporte => `
                                 <tr>
-                                    <td>${profesor.idprofesor ?? profesor.id}</td>
-                                    <td>${profesor.nombre}</td>
-                                    <td>${profesor.apellido}</td>
-                                    <td>${profesor.dni}</td>
-                                    <td>${profesor.telefono ?? "-"}</td>
-                                    <td>${profesor.mail ?? profesor.email ?? "-"}</td>
+                                    <td>${reporte.id_reporte}</td>
+                                    <td>${reporte.id_rutina}</td>
+                                    <td>${reporte.id_socio}</td>
+                                    <td>${reporte.dia}</td>
+                                    <td>${reporte.fecha_asistencia}</td>
                                     <td>
-                                        <a href="modificar-profesor.html?id=${profesor.idprofesor ?? profesor.id}" class="button is-small is-warning">Editar</a>
-                                        <a href="eliminar-profesor.html?id=${profesor.idprofesor ?? profesor.id}" class="button is-small is-danger">Eliminar</a>
+                                        <a href="modificar-reporte.html?id=${reporte.id_reporte}" class="button is-small is-warning">Editar</a>
+                                        <a href="eliminar-reporte.html?id=${reporte.id_reporte}" class="button is-small is-danger">Eliminar</a>
                                     </td>
                                 </tr>
                             `).join("");
 
                         } catch (error) {
-                            tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered has-text-danger">Error al cargar los profesores: ${error.message}</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered has-text-danger">Error al cargar los reportes: ${error.message}</td></tr>`;
                         }
                     }
 
-                    cargarProfesores();
+                    cargarReportes();
                 </script>
             </div>
         </div>

@@ -47,17 +47,15 @@
     </div>
 </nav>
             <div class="content">
-                <h1 class="title is-1">Modificar Profesor</h1>
-                <p class="subtitle mt-4">Actualizá los datos del profesor seleccionado.</p>
+                <h1 class="title is-1">Modificar Reportes</h1>
+                <p class="subtitle mt-4">Actualizá los datos del reporte seleccionado.</p>
 
-                <!-- Div para mensajes de carga o error inicial -->
                 <div id="mensaje-carga"></div>
 
-                <!-- Buscador manual agregado -->
                 <div id="buscador-manual" style="display: none;" class="box">
                     <div class="field has-addons">
                         <div class="control is-expanded">
-                            <input class="input" type="number" id="input-id-manual" placeholder="Ingresá el ID del profesor">
+                            <input class="input" type="number" id="input-id-manual" placeholder="Ingresá el ID del socio">
                         </div>
                         <div class="control">
                             <button id="btn-buscar" class="button is-info">Buscar</button>
@@ -65,41 +63,32 @@
                     </div>
                 </div>
 
-                <!-- Formulario, arranca oculto hasta que se carga un profesor -->
-                <form id="form-modificar-profesor" style="display: none;">
+                <form id="form-modificar-reporte" style="display: none;">
                     <div class="field">
-                        <label class="label">Nombre</label>
+                        <label class="label">Id Rutina</label>
                         <div class="control">
-                            <input class="input" type="text" id="nombre" required>
+                            <input class="input" type="number" id="id_rutina" required>
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="label">Apellido</label>
+                        <label class="label">Id Socio</label>
                         <div class="control">
-                            <input class="input" type="text" id="apellido" required>
+                            <input class="input" type="number" id="id_socio" required>
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="label">DNI</label>
+                        <label class="label">Día</label>
                         <div class="control">
-                            <input class="input" type="text" id="dni" required>
+                            <input class="input" type="number" id="dia" required>
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="label">Teléfono</label>
+                        <label class="label">Fecha de Asistencia</label>
                         <div class="control">
-                            <input class="input" type="text" id="telefono" placeholder="10 dígitos, sin espacios" pattern="[0-9]{10}" maxlength="10" required>
-                        </div>
-                        <p class="help">Debe tener exactamente 10 dígitos numéricos</p>
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Mail</label>
-                        <div class="control">
-                            <input class="input" type="email" id="mail" required>
+                            <input class="input" type="date" id="fecha_asistencia">
                         </div>
                     </div>
 
@@ -108,7 +97,7 @@
                             <button type="submit" class="button is-warning">Guardar Cambios</button>
                         </div>
                         <div class="control">
-                            <a href="profesores.html" class="button is-light">Cancelar</a>
+                            <a href="reportes.html" class="button is-light">Cancelar</a>
                         </div>
                     </div>
                 </form>
@@ -119,44 +108,43 @@
 
         <script>
             const params = new URLSearchParams(window.location.search);
-            let id_profesor = params.get("id");
+            let idReporte = params.get("id");
 
             const mensajeCargaDiv = document.getElementById("mensaje-carga");
             const buscadorManualDiv = document.getElementById("buscador-manual");
-            const form = document.getElementById("form-modificar-profesor");
+            const form = document.getElementById("form-modificar-reporte");
             const mensajeDiv = document.getElementById("mensaje");
 
-            async function cargarProfesor(id) {
+            async function cargarReporte(id) {
                 mensajeCargaDiv.innerHTML = "";
                 form.style.display = "none";
 
                 try {
-                    const response = await fetch(`http://localhost:3000/api/profesores/${id}`);
+                    const response = await fetch(`http://localhost:3000/api/reportes/${id}`);
 
                     if (!response.ok) {
-                        throw new Error("Profesor no encontrado");
+                        throw new Error("Reporte no encontrado");
                     }
 
-                    const profesor = await response.json();
+                    const reporte = await response.json();
 
-                    document.getElementById("nombre").value = profesor.nombre;
-                    document.getElementById("apellido").value = profesor.apellido;
-                    document.getElementById("dni").value = profesor.dni;
-                    document.getElementById("telefono").value = profesor.telefono;
-                    document.getElementById("mail").value = profesor.mail;
+                    document.getElementById("id_rutina").value = reporte.id_rutina;
+                    document.getElementById("id_socio").value = reporte.id_socio;
+                    document.getElementById("dia").value = reporte.dia;
+                    document.getElementById("fecha_asistencia").value = reporte.fecha_asistencia;
 
-                    id_profesor = id;
+                    idReporte = id;
                     form.style.display = "block";
 
                 } catch (error) {
-                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar el profesor: ${error.message}</div>`;
+                    mensajeCargaDiv.innerHTML = `<div class="notification is-danger">Error al cargar el reporte: ${error.message}</div>`;
                 }
             }
 
             document.getElementById("btn-buscar").addEventListener("click", () => {
                 const idIngresado = document.getElementById("input-id-manual").value;
                 if (idIngresado) {
-                    cargarProfesor(idIngresado);
+                    cargarReporte(idIngresado);
                 }
             });
 
@@ -164,19 +152,18 @@
                 e.preventDefault();
                 mensajeDiv.innerHTML = "";
 
-                const profesorActualizado = {
-                    nombre: document.getElementById("nombre").value,
-                    apellido: document.getElementById("apellido").value,
-                    dni: document.getElementById("dni").value,
-                    telefono: document.getElementById("telefono").value,
-                    mail: document.getElementById("mail").value
+                const reporteActualizado = {
+                    id_rutina: document.getElementById("id_rutina").value,
+                    id_socio: document.getElementById("id_socio").value,
+                    dia: document.getElementById("dia").value,
+                    fecha_asistencia: document.getElementById("fecha_asistencia").value,
                 };
 
                 try {
-                    const response = await fetch(`http://localhost:3000/api/profesores/${id_profesor}`, {
+                    const response = await fetch(`http://localhost:3000/api/reportes/${idReporte}`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(profesorActualizado)
+                        body: JSON.stringify(reporteActualizado)
                     });
 
                     if (!response.ok) {
@@ -184,20 +171,19 @@
                         throw new Error(errorData?.error || `Error ${response.status}`);
                     }
 
-                    mensajeDiv.innerHTML = `<div class="notification is-success">Profesor actualizado con éxito. Volviendo al listado... <a href="profesores.html">Volver ahora</a></div>`;
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Reporte actualizado con éxito. Volviendo al listado... <a href="reportes.html">Volver ahora</a></div>`;
 
                     setTimeout(() => {
-                        window.location.href = "profesores.html";
+                        window.location.href = "reportes.html";
                     }, 1500);
 
                 } catch (error) {
-                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al actualizar el profesor: ${error.message}</div>`;
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al actualizar el reporte: ${error.message}</div>`;
                 }
             });
 
-            // Lógica inicial: si hay ID en la URL lo carga, sino muestra el buscador
-            if (id_profesor) {
-                cargarProfesor(id_profesor);
+            if (idReporte) {
+                cargarReporte(idReporte);
             } else {
                 buscadorManualDiv.style.display = "block";
             }

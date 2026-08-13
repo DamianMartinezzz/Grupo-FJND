@@ -46,54 +46,46 @@
         </div>
     </div>
 </nav>
-
             <div class="content">
-                <h1 class="title is-1">Crear Profesor</h1>
-                <p class="subtitle mt-4">Completá los datos para registrar un nuevo profesor en el sistema.</p>
+                <h1 class="title is-1">Crear Reporte</h1>
+                <p class="subtitle mt-4">Completá los datos para registrar un nuevo reporte en el sistema.</p>
 
-                <form id="form-crear-profesor">
+                <form id="form-crear-reporte">
                     <div class="field">
-                        <label class="label">Nombre</label>
+                        <label class="label">Id Rutina</label>
                         <div class="control">
-                            <input class="input" type="text" id="nombre" required>
+                            <input class="input" type="number" id="id_rutina" required>
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="label">Apellido</label>
+                        <label class="label">Id Socio</label>
                         <div class="control">
-                            <input class="input" type="text" id="apellido" required>
+                            <input class="input" type="number" id="id_socio" required>
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="label">DNI</label>
+                        <label class="label">Día</label>
                         <div class="control">
-                            <input class="input" type="text" id="dni" required>
+                            <input class="input" type="number" id="dia" required>
                         </div>
                     </div>
 
+                   
                     <div class="field">
-                        <label class="label">Teléfono</label>
+                        <label class="label">Fecha Asistencia</label>
                         <div class="control">
-                            <input class="input" type="text" id="telefono" placeholder="10 dígitos, sin espacios" pattern="[0-9]{10}" maxlength="10" required>
-                        </div>
-                        <p class="help">Debe tener exactamente 10 dígitos numéricos</p>
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Mail</label>
-                        <div class="control">
-                            <input class="input" type="email" id="mail" required>
+                            <input class="input" type="date" id="fecha_asistencia">
                         </div>
                     </div>
 
                     <div class="field is-grouped mt-5">
                         <div class="control">
-                            <button type="submit" class="button is-primary">Crear Profesor</button>
+                            <button type="submit" class="button is-primary">Crear Reporte</button>
                         </div>
                         <div class="control">
-                            <a href="profesores.html" class="button is-light">Cancelar</a>
+                            <a href="reportes.html" class="button is-light">Cancelar</a>
                         </div>
                     </div>
                 </form>
@@ -103,27 +95,26 @@
         </div>
 
         <script>
-            const API_URL = "http://localhost:3000/api/profesores";
+            const API_URL = "http://localhost:3000/api/reportes";
 
-            document.getElementById("form-crear-profesor").addEventListener("submit", async (e) => {
+            document.getElementById("form-crear-reporte").addEventListener("submit", async (e) => {
                 e.preventDefault();
 
                 const mensajeDiv = document.getElementById("mensaje");
                 mensajeDiv.innerHTML = "";
 
-                const nuevoProfesor = {
-                    nombre: document.getElementById("nombre").value,
-                    apellido: document.getElementById("apellido").value,
-                    dni: document.getElementById("dni").value,
-                    telefono: document.getElementById("telefono").value,
-                    mail: document.getElementById("mail").value
+                const nuevoReporte = {
+                    id_rutina: document.getElementById("id_rutina").value,
+                    id_socio: document.getElementById("id_socio").value,
+                    dia: document.getElementById("dia").value,
+                    fecha_asistencia: document.getElementById("fecha_asistencia").value,
                 };
 
                 try {
                     const response = await fetch(API_URL, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(nuevoProfesor)
+                        body: JSON.stringify(nuevoReporte)
                     });
 
                     if (!response.ok) {
@@ -131,14 +122,15 @@
                         throw new Error(errorData?.error || `Error ${response.status}`);
                     }
 
-                    mensajeDiv.innerHTML = `<div class="notification is-success">Profesor creado con éxito. Redirigiendo...</div>`;
+                    mensajeDiv.innerHTML = `<div class="notification is-success">Reporte creado con éxito. Redirigiendo...</div>`;
                     
+                    // Redirige automáticamente a la lista de reportes después de 1 segundo y medio
                     setTimeout(() => {
-                        window.location.href = "profesores.html";
+                        window.location.href = "reportes.html";
                     }, 1500);
 
                 } catch (error) {
-                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al crear el profesor: ${error.message}</div>`;
+                    mensajeDiv.innerHTML = `<div class="notification is-danger">Error al crear el reporte: ${error.message}</div>`;
                 }
             });
         </script>
