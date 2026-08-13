@@ -147,7 +147,7 @@
 
                 const selectProfesor = document.getElementById("id_profesor");
                 selectProfesor.innerHTML = profesores.map(p =>
-                    `<option value="${p.id_profesor}" ${p.id_profesor == idProfesorActual ? "selected" : ""}>${p.nombre} ${p.apellido}</option>`
+                    `<option value="${p.idprofesor}" ${p.idprofesor == idProfesorActual ? "selected" : ""}>${p.nombre} ${p.apellido}</option>`
                 ).join("");
             }
 

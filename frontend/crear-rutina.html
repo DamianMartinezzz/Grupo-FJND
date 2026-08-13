@@ -138,7 +138,7 @@
                 const profesores = await response.json();
 
                 select.innerHTML = `<option value="">Seleccioná un profesor</option>` +
-                    profesores.map(p => `<option value="${p.id_profesor}">${p.nombre} ${p.apellido}</option>`).join("");
+                    profesores.map(p => `<option value="${p.idprofesor}">${p.nombre} ${p.apellido}</option>`).join("");
             }
 
             document.getElementById("form-crear-rutina").addEventListener("submit", async (e) => {
@@ -156,7 +156,7 @@
                     fecha_modificacion: new Date().toISOString().split("T")[0],
                     estado: document.getElementById("estado").value
                 };
-
+console.log(nuevaRutina);
                 try {
                     const response = await fetch(API_RUTINAS, {
                         method: "POST",

@@ -156,7 +156,7 @@
                     }
 
                     select.innerHTML = `<option value="">Seleccioná un profesor</option>` +
-                        profesores.map(p => `<option value="${p.id_profesor}">${p.nombre} ${p.apellido}</option>`).join("");
+                        profesores.map(p => `<option value="${p.idprofesor}">${p.nombre} ${p.apellido}</option>`).join("");
 
                 } catch (error) {
                     select.innerHTML = `<option value="">Error al cargar profesores</option>`;
