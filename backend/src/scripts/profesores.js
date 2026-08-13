@@ -28,7 +28,7 @@ async function createProfesor(nombre, apellido, dni, mail, telefono) {
 async function updateProfesor(id, nombre, apellido, dni, mail, telefono) {
   try {
     const result = await dbClient.query(
-      'UPDATE profesores SET nombre = $1, apellido = $2, dni = $3, mail = $4, telefono = $5 WHERE id_profesor = $6 RETURNING *',
+      'UPDATE profesores SET nombre = $1, apellido = $2, dni = $3, mail = $4, telefono = $5 WHERE idprofesor = $6 RETURNING *',
       [nombre, apellido, dni, mail, telefono, id]
     );
     if (result.rowCount === 0) {
@@ -45,7 +45,7 @@ async function updateProfesor(id, nombre, apellido, dni, mail, telefono) {
 
 async function deleteProfesor(id) {
   try {
-    const result = await dbClient.query('DELETE FROM profesores WHERE id_profesor = $1 RETURNING *', [id]);
+    const result = await dbClient.query('DELETE FROM profesores WHERE idprofesor = $1 RETURNING *', [id]);
     if (result.rowCount === 0) {
       return { error: 'not_found' };
     }

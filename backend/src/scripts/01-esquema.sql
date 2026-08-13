@@ -12,7 +12,7 @@ CREATE TABLE Socios (
 );
 
 CREATE TABLE Profesores (
-    Id_Profesor SERIAL PRIMARY KEY,
+    IdProfesor SERIAL PRIMARY KEY,
     Nombre VARCHAR(100) NOT NULL,
     Apellido VARCHAR(100) NOT NULL,
     DNI VARCHAR(20) UNIQUE NOT NULL,
