@@ -73,6 +73,7 @@ const {
  
 const {
     getAllDetalleReporte,
+    getOneDetalleReporte,
     getDetallesByReporte,
     createDetalleReporte,
     updateDetalleReporte,

@@ -39,6 +39,7 @@
             <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link">Reportes</a>
                 <div class="navbar-dropdown">
+                    <a class="navbar-item" href="reportes.html">Arma tu reporte</a>
                     <a class="navbar-item" href="detalle-reporte.html">Ver detalle de reportes</a>
                 </div>
             </div>
@@ -52,9 +53,9 @@
 
                 <form id="formCrearDetalle" class="box">
                     <div class="field">
-                        <label class="label">ID Rutina</label>
+                        <label class="label">ID Reporte</label>
                         <div class="control">
-                            <input class="input" type="number" id="id_rutina" required>
+                            <input class="input" type="number" id="id_reporte" required>
                         </div>
                     </div>
 
@@ -66,44 +67,30 @@
                     </div>
 
                     <div class="field">
-                        <label class="label">Día</label>
+                        <label class="label">Series Realizadas</label>
                         <div class="control">
-                            <input class="input" type="number" id="dia" required>
+                            <input class="input" type="number" id="series_realizadas" required>
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="label">Orden</label>
+                        <label class="label">Repeticiones</label>
                         <div class="control">
-                            <input class="input" type="number" id="orden" required>
+                            <input class="input" type="number" id="repeticiones" required>
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="label">Series</label>
+                        <label class="label">Peso (kg)</label>
                         <div class="control">
-                            <input class="input" type="number" id="series" required>
+                            <input class="input" type="number" id="peso" required>
                         </div>
                     </div>
 
                     <div class="field">
-                        <label class="label">Repeticiones Desde</label>
+                        <label class="label">Observaciones</label>
                         <div class="control">
-                            <input class="input" type="number" id="repeticiones_desde" required>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Repeticiones Hasta</label>
-                        <div class="control">
-                            <input class="input" type="number" id="repeticiones_hasta" required>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Descanso (segundos)</label>
-                        <div class="control">
-                            <input class="input" type="number" id="descanso">
+                            <input class="input" type="text" id="observaciones" required>
                         </div>
                     </div>
 
@@ -123,14 +110,12 @@
                     document.getElementById('formCrearDetalle').addEventListener('submit', async (e) => {
                         e.preventDefault();
                         const data = {
-                            id_rutina: document.getElementById('id_rutina').value,
+                            id_reporte: document.getElementById('id_reporte').value,
                             id_ejercicio: document.getElementById('id_ejercicio').value,
-                            dia: document.getElementById('dia').value,
-                            orden: document.getElementById('orden').value,
-                            series: document.getElementById('series').value,
-                            repeticiones_desde: document.getElementById('repeticiones_desde').value,
-                            repeticiones_hasta: document.getElementById('repeticiones_hasta').value,
-                            descanso: document.getElementById('descanso').value || null
+                            series_realizadas: document.getElementById('series_realizadas').value,
+                            repeticiones_realizadas: document.getElementById('repeticiones').value,
+                            peso_utilizado: document.getElementById('peso').value,
+                            observaciones: document.getElementById('observaciones').value,
                         };
 
                         try {
